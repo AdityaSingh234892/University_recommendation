@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University Recommendation</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: url('{% static "images/university-bg.AVIF" %}') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1;
+        }
+        .content {
+            z-index: 2;
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.5); /* Semi-transparent white background */
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: white; /* White text color */
+            background-color: #4CAF50; /* Green background color */
+            padding: 15px; /* Padding inside the box */
+            border-radius: 8px; /* Rounded corners */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Optional: Add a shadow for depth */
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 0px;
+        }
+        form label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        form input, form select {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 20px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            background: linear-gradient(90deg, #45a049, #4CAF50);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        #recommendation-result {
+            padding: 12px 20px;
+            margin-top: 20px;
+        }
+        .loading {
+            color:rgb(6, 62, 8);
+            font-size: 25px;
+            font-weight: bold;
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        table th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        table tr:nth-child(even) {
+            background-color:rgb(255, 255, 255);
+        }
+        table tr:hover {
+            background-color:rgb(255, 255, 255);
+        }
+        .direct-apply-btn {
+            background-color:rgb(0, 159, 5);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            display: block;
+            text-align: center;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .direct-apply-btn:hover {
+            background-color:rgb(0, 57, 3);
+        }
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 16px;
+                padding: 8px;
+            }
+
+            .content {
+                width: 100%;
+                padding: 10px;
+            }
+
+            form input, form select {
+                font-size: 12px;
+                padding: 6px;
+            }
+
+            .btn {
+                font-size: 12px;
+                padding: 8px;
+            }
+
+            table th, table td {
+                font-size: 10px;
+                padding: 5px;
+            }
+
+            .direct-apply-btn {
+                font-size: 12px;
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    <div class="content">
+        <h1> <a href="/admin/" target="_blank" style="text-decoration: none; color: white;">Find Your Best Fit University</a></h1>
+        <form method="post" id="recommendation-form">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn">Get Recommendations</button>
+        </form>
+        <div id="recommendation-result"></div>
+    </div>
+
+    <script>
+        document.getElementById('recommendation-form').addEventListener('submit', async function (e) {
+            e.preventDefault(); // Prevent default form submission
+
+            const formData = new FormData(this);
+            const resultDiv = document.getElementById('recommendation-result');
+            resultDiv.innerHTML = '<p class="loading">Loading recommendations...</p>'; // Show loading message
+
+            try {
+                // Send the POST request to the server
+                const response = await fetch('/', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const result = await response.json();
+
+                if (result.status === "success" && result.recommendation) {
+                    // Parse the recommendation response into a table
+                    const lines = result.recommendation.split("\n").filter(line => line.trim() !== "");
+
+                    // Validate that the recommendation response contains data
+                    if (lines.length > 2) {
+                        const headers = lines[0].split("|").map(h => h.trim()).slice(1, -1);
+                        const rows = lines.slice(1).map(line =>
+                            line.split("|").map(cell => cell.trim()).slice(1, -1)
+                        );
+
+                        let tableHTML = `<h2>Recommended Universities</h2><table><thead><tr>`;
+                        headers.forEach(header => {
+                            tableHTML += `<th>${header}</th>`;
+                        });
+                        tableHTML += `</tr></thead><tbody>`;
+                        rows.forEach(row => {
+                            tableHTML += `<tr>`;
+                            row.forEach(cell => {
+                                tableHTML += `<td>${cell}</td>`;
+                            });
+                            tableHTML += `</tr>`;
+                        });
+                        tableHTML += `</tbody></table>`;
+                        const whatsappLink = "http://wa.me/918239640289"; // Replace with your WhatsApp link
+                        tableHTML += `<a href="${whatsappLink}" target="_blank" class="direct-apply-btn">Direct Apply For Admissions</a>`;
+
+
+                        resultDiv.innerHTML = tableHTML;
+                    } else {
+                        resultDiv.innerHTML = '<p>No valid recommendations received. Please try again.</p>';
+                    }
+                } else {
+                    resultDiv.innerHTML = `<p>Error: ${result.message || 'No recommendations received.'}</p>`;
+                }
+            } catch (error) {
+                console.error('Error fetching recommendations:', error);
+                resultDiv.innerHTML = '<p>An error occurred while fetching recommendations. Please try again later.</p>';
+            }
+        });
+       
+    </script>
+</body>
+</html>
