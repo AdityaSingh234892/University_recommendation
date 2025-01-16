@@ -35,7 +35,7 @@ def get_recommendations(request):
             - GPA: {user_data['gpa_score']}
             - 12th Grade Percentage: {user_data['twelveth_percentage']}
             - TOEFL/IELTS Score: {user_data['toefl_score']}
-            - DUOLINGO/PTE Score: {user_data['bachelors_percentage']}
+            - DUOLINGO/PTE Score: {user_data['Duolingo_PTE']}
             - Preferred Course/Field of Study: {user_data['preferred_course']}
             for Postgratuate studies Requirment According to the user details.
              -Bachelor’s course: {user_data['bachelors_course']}
