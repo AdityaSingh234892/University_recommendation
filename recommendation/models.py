@@ -9,7 +9,7 @@ class User(models.Model):
     board = models.CharField(max_length=50)
     degree = models.CharField(max_length=50)
     bachelors_course = models.CharField(max_length=100, null=True, blank=True)
-    bachelors_percentage = models.CharField(max_length=10, null=True, blank=True)
+    Duolingo_PTE = models.CharField(max_length=10, null=True, blank=True)
     toefl_score = models.CharField(max_length=100, null=True, blank=True)
     gre_score = models.CharField(max_length=100, null=True, blank=True)
     gpa_score = models.CharField(max_length=100, null=True, blank=True)

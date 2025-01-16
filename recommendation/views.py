@@ -25,21 +25,34 @@ def get_recommendations(request):
 
             # Prepare the OpenAI prompt
             prompt = f"""
-            Based on the following information, suggest universities:
-            Name: {user_data['name']}
-            My Country: {user_data['Your_country']} 
-            the Country for Study: {user_data['country']}
-            Degree: {user_data['degree']}
-            GPA: {user_data['gpa_score']}
-            12th Percentage: {user_data['twelveth_percentage']}
-            TOEFL/IELTS: {user_data['toefl_score']}
-            Preferred Course: {user_data['preferred_course']}
-            Provide the recommendation in a table format with columns: 
-            University Name, Fees, Ranking, Location. The value of header should be:
-            'University Name','Fees','Ranking','Location'. 
-            Provide exactly 10 universities with the best fit for the user's preferences, 
-            and include information about their Global Ranking.
-            """
+            Based on the provided user details, recommend universities and programs:
+
+            User Information:
+            - Name: {user_data['name']}
+            - Home Country: {user_data['Your_country']}
+            - Preferred Study Country: {user_data['country']}
+            - Program Level: {user_data['degree']}
+            - GPA: {user_data['gpa_score']}
+            - 12th Grade Percentage: {user_data['twelveth_percentage']}
+            - TOEFL/IELTS Score: {user_data['toefl_score']}
+            - DUOLINGO/PTE Score: {user_data['bachelors_percentage']}
+            - Preferred Course/Field of Study: {user_data['preferred_course']}
+            for Postgratuate studies Requirment According to the user details.
+             -Bachelor’s course: {user_data['bachelors_course']}
+
+          Recommendation Requirements:
+          1. Provide a list of **10 universities** that are the best fit for the user’s preferences, displayed in a table format with the following headers:
+          | University Name | Fees | Global Ranking | Location |
+          2. Ensure the universities:
+          - Offer programs relevant to the user’s preferred field of study.
+          - Include their global ranking, tuition fees, and location in the table.
+
+          3. Tailor recommendations based on:
+           - The user's academic qualifications (GPA, 12th percentage).
+           - The TOEFL/IELTS score for language proficiency requirements.
+           - The preferred program level and course of study.
+         """
+            
 
             try:
                 # Call OpenAI API

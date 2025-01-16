@@ -397,8 +397,10 @@ class UserForm(forms.ModelForm):
 
     DEGREE_CHOICES = [
         ('', 'Select Degree'),
-        ('Bachelors', 'Bachelors'),
-        ('Masters', 'Masters'),
+        ('UG', 'UnderGraduate'),
+        ('PG', 'PostGraduate'),
+        ('Diploma', 'Diploma'),
+        ('PHD', 'PHD'),
     ]
 
     BOARD_CHOICES = [
@@ -627,9 +629,16 @@ class UserForm(forms.ModelForm):
         widget=forms.Select(attrs={'placeholder': 'Select the country for study'})
     )
     degree = forms.ChoiceField(
+        label="Program Level:",
         choices=DEGREE_CHOICES,
         required=True,
         widget=forms.Select(attrs={'placeholder': 'Select your degree'})
+    )
+    board = forms.CharField(
+        label="High School Board:",
+        max_length=255,
+        required=True,
+        widget=forms.TextInput(attrs={'placeholder': 'Select your Board'})
     )
     preferred_course = forms.ChoiceField(
         choices=BOARD_CHOICES,
@@ -637,16 +646,16 @@ class UserForm(forms.ModelForm):
         widget=forms.Select(attrs={'placeholder': 'Select your preferred course'})
     )
     bachelors_course = forms.CharField(
-        label=" Bachelor’s course",help_text="<span style='font-size: smaller; font-weight: normal;'>(If pursuing a Master's, fill this option; otherwise, Fill null.)</span>",
+        label=" Bachelor’s course",help_text="<span style='font-size: smaller; font-weight: normal;'>(If Applying For PostGraduate, fill this option; otherwise, Fill null.)</span>",
         max_length=255,
         required=False,
         widget=forms.TextInput(attrs={'placeholder': 'Enter your bachelor’s course (if applicable)'})
     )
-    bachelors_percentage = forms.CharField(
-        label="Bachelor’s percentage/CGPA",help_text="<span style='font-size: smaller; font-weight: normal;'>(If pursuing a Master's, fill this option; otherwise, Fill null.)</span>",
+    Duolingo_PTE = forms.CharField(
+        label="DUOLINGO/PTE Score:",help_text="<span style='font-size: smaller; font-weight: normal;'>(If you took the exam, write the score otherwise, write null.)</span>",
         max_length=15,
         required=False,
-        widget=forms.TextInput(attrs={'placeholder': 'Enter your bachelor’s percentage (e.g., 85.5%)'}),
+        widget=forms.TextInput(attrs={'placeholder': 'Enter DUOLINGO/PTE score'}),
         
     )
     toefl_score = forms.CharField(
@@ -654,7 +663,7 @@ class UserForm(forms.ModelForm):
         required=False,
         max_length=15,
         help_text="<span style='font-size: smaller; font-weight: normal;'>(If you took the exam, write the score otherwise, write null.)</span>",
-        widget=forms.TextInput(attrs={'placeholder': 'Enter your TOEFL score'})
+        widget=forms.TextInput(attrs={'placeholder': 'Enter your TOEFL/IELTS score'})
     )
     gre_score = forms.CharField(
         label="GRE Score",
@@ -667,7 +676,7 @@ class UserForm(forms.ModelForm):
         label="GPA Score",
         max_length=15,
         required=False,
-        help_text="<span style='font-size: smaller; font-weight: normal;'>(If you took the exam, write the score otherwise, write null.)</span>",
+        help_text="<span style='font-size: smaller; font-weight: normal;'>(If Applying For PostGraduate, fill this option; otherwise, Fill null.)</span>",
         widget=forms.TextInput(attrs={'placeholder': 'Enter your GPA (e.g., 3.75)'})
     )
     twelveth_percentage = forms.DecimalField(
@@ -688,8 +697,6 @@ class UserForm(forms.ModelForm):
     class Meta:
         model = User
         fields = [
-            'name', 'mobile', 'email','Your_country', 'country', 'board', 'degree',
-            'bachelors_course', 'bachelors_percentage', 'toefl_score',
-            'gre_score', 'gpa_score', 'twelveth_percentage', 'tenth_percentage',
-            'preferred_course'
+            'name', 'mobile', 'email','Your_country', 'country', 'board','twelveth_percentage', 'tenth_percentage', 'degree',
+            'bachelors_course','gpa_score','toefl_score','Duolingo_PTE','gre_score', 'preferred_course'
         ]
