@@ -4,7 +4,7 @@ from .models import User
 class UserForm(forms.ModelForm):
     # Dropdown choices
     Your_COUNTRY_CHOICES = [
-        ('', 'Select Which Country Belong to '),
+        ('', 'Select Which Country you Belong to '),
         ('AFG', 'Afghanistan'),
 ('ALB', 'Albania'),
 ('DZA', 'Algeria'),
@@ -619,9 +619,10 @@ class UserForm(forms.ModelForm):
         widget=forms.EmailInput(attrs={'placeholder': 'Enter your email address'})
     )
     Your_country = forms.ChoiceField(
+        label="Home Country", 
         choices=Your_COUNTRY_CHOICES,
         required=True,
-        widget=forms.Select(attrs={'placeholder': 'Select your country'})
+        widget=forms.Select(attrs={'placeholder': 'Select your Home country'})
     )
     country = forms.ChoiceField(
         choices=COUNTRY_CHOICES,
@@ -638,7 +639,7 @@ class UserForm(forms.ModelForm):
         label="High School Board:",
         max_length=255,
         required=True,
-        widget=forms.TextInput(attrs={'placeholder': 'Select your Board'})
+        widget=forms.TextInput(attrs={'placeholder': 'Ex. CBSE, ICSE, IB, etc.'})
     )
     preferred_course = forms.ChoiceField(
         choices=BOARD_CHOICES,
