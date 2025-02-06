@@ -57,7 +57,7 @@ def get_recommendations(request):
             try:
                 # Call OpenAI API
                 response = openai.ChatCompletion.create(
-                    model="gpt-4o mini",
+                    model="gpt-4o-mini",
                     messages=[{"role": "system", "content": prompt}],
                     max_tokens=500
                 )

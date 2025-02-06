@@ -678,7 +678,7 @@ class UserForm(forms.ModelForm):
         max_length=15,
         required=False,
         help_text="<span style='font-size: smaller; font-weight: normal;'>(If Applying For PostGraduate, fill this option; otherwise, Fill null.)</span>",
-        widget=forms.TextInput(attrs={'placeholder': 'Enter your GPA (e.g., 3.75 out of 4)/Enter Bachelor's Percentage e.g 85 out of 100'})
+        widget=forms.TextInput(attrs={'placeholder': 'Enter your GPA (e.g., 3.75 out of 4)/Enter Bachelors Percentage e.g 85 out of 100'})
     )
     twelveth_percentage = forms.DecimalField(
         label="12th Percentage",
