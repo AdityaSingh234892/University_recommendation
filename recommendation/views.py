@@ -32,7 +32,7 @@ def get_recommendations(request):
             - Home Country: {user_data['Your_country']}
             - Preferred Study Country: {user_data['country']}
             - Program Level: {user_data['degree']}
-            - GPA: {user_data['gpa_score']}
+            - GPA/Bachelor's Percentage: {user_data['gpa_score']}
             - 12th Grade Percentage: {user_data['twelveth_percentage']}
             - TOEFL/IELTS Score: {user_data['toefl_score']}
             - DUOLINGO/PTE Score: {user_data['Duolingo_PTE']}
@@ -57,7 +57,7 @@ def get_recommendations(request):
             try:
                 # Call OpenAI API
                 response = openai.ChatCompletion.create(
-                    model="gpt-4",
+                    model="gpt-4o mini",
                     messages=[{"role": "system", "content": prompt}],
                     max_tokens=500
                 )

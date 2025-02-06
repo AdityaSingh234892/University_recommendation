@@ -674,11 +674,11 @@ class UserForm(forms.ModelForm):
         widget=forms.TextInput(attrs={'placeholder': 'Enter your GRE score'})
     )
     gpa_score = forms.CharField(
-        label="GPA Score",
+        label="GPA Score/Bachelor's Percentage",
         max_length=15,
         required=False,
         help_text="<span style='font-size: smaller; font-weight: normal;'>(If Applying For PostGraduate, fill this option; otherwise, Fill null.)</span>",
-        widget=forms.TextInput(attrs={'placeholder': 'Enter your GPA (e.g., 3.75)'})
+        widget=forms.TextInput(attrs={'placeholder': 'Enter your GPA (e.g., 3.75 out of 4)/Enter Bachelor's Percentage e.g 85 out of 100'})
     )
     twelveth_percentage = forms.DecimalField(
         label="12th Percentage",
@@ -698,6 +698,6 @@ class UserForm(forms.ModelForm):
     class Meta:
         model = User
         fields = [
-            'name', 'mobile', 'email','Your_country', 'country', 'board','twelveth_percentage', 'tenth_percentage', 'degree',
-            'bachelors_course','gpa_score','toefl_score','Duolingo_PTE','gre_score', 'preferred_course'
+            'name', 'mobile', 'email','Your_country', 'country', 'board','twelveth_percentage', 'tenth_percentage', 
+            'bachelors_course','gpa_score','toefl_score','Duolingo_PTE','gre_score','degree', 'preferred_course'
         ]

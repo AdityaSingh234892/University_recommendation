@@ -127,6 +127,23 @@
         .direct-apply-btn:hover {
             background-color:rgb(0, 57, 3);
         }
+        #direct-apply-options {
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+        #direct-apply-options a {
+            background-color: #008CBA;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin: 5px;
+            display: inline-block;
+        }
+        #direct-apply-options a:hover {
+            background-color: #005f73;
+        }
         @media (max-width: 480px) {
             h1 {
                 font-size: 16px;
@@ -207,7 +224,7 @@
                         let tableHTML = `<h2>Recommended Universities</h2><table><thead><tr>`;
                         headers.forEach(header => {
                             tableHTML += `<th>${header}</th>`;
-                        });
+                        }); 
                         tableHTML += `</tr></thead><tbody>`;
                         rows.forEach(row => {
                             tableHTML += `<tr>`;
@@ -217,11 +234,25 @@
                             tableHTML += `</tr>`;
                         });
                         tableHTML += `</tbody></table>`;
-                        const whatsappLink = "http://wa.me/918239640289"; // Replace with your WhatsApp link
-                        tableHTML += `<a href="${whatsappLink}" target="_blank" class="direct-apply-btn">Direct Apply For Admissions</a>`;
-
+                        tableHTML += `<button id="direct-apply-btn" class="direct-apply-btn">Direct Apply For Admissions</button>`;
+                        tableHTML += `<div id="direct-apply-options">
+                            <a href="http://wa.me/918239640289" target="_blank">WhatsApp</a>
+                            <a href="tel:+447915608702" target="_blank">Contact No</a>
+                            <a href="mailto:Info@foreignpathway.com" target="_blank">Email</a>
+                        </div>`;
 
                         resultDiv.innerHTML = tableHTML;
+
+                        // Add event listener to toggle the direct apply options
+                        document.getElementById("direct-apply-btn").addEventListener("click", function (e) {
+                            e.preventDefault();
+                            const options = document.getElementById("direct-apply-options");
+                            if (options.style.display === "none" || options.style.display === "") {
+                                options.style.display = "block";
+                            } else {
+                                options.style.display = "none";
+                            }
+                        });
                     } else {
                         resultDiv.innerHTML = '<p>No valid recommendations received. Please try again.</p>';
                     }
