@@ -11,6 +11,12 @@
         box-sizing: border-box;
       }
 
+      html {
+        scroll-behavior: smooth;
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+      }
+
       body {
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         margin: 0;
@@ -20,6 +26,9 @@
         background-size: cover;
         min-height: 100vh;
         position: relative;
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+        overscroll-behavior: contain;
       }
 
       .overlay {
@@ -40,6 +49,8 @@
         align-items: center;
         justify-content: center;
         padding: 20px;
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
       }
 
       .wizard-container {
@@ -49,6 +60,9 @@
         border-radius: 15px;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         overflow: hidden;
+        animation: slideIn 0.6s ease-out;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
         animation: slideIn 0.6s ease-out;
       }
 
@@ -77,21 +91,58 @@
         font-weight: bold;
         margin: 0;
         text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+        user-select: none;
+        transition: all 0.3s ease;
+        position: relative;
+        display: inline-block;
       }
 
-      .admin-link {
-        position: absolute;
-        top: 15px;
-        right: 20px;
-        color: white;
-        text-decoration: none;
-        font-size: 12px;
-        opacity: 0.8;
-        transition: opacity 0.3s;
+      .wizard-title:hover {
+        transform: scale(1.02);
+        text-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
       }
 
-      .admin-link:hover {
+      .admin-access {
+        font-size: 16px;
+        margin-left: 8px;
+        opacity: 0.7;
+        transition: opacity 0.3s ease;
+      }
+
+      .wizard-title:hover .admin-access {
         opacity: 1;
+      }      /* Mobile-specific styling for better touch interaction */
+      @media (hover: none) and (pointer: coarse) {
+        .wizard-title:hover {
+          transform: none;
+        }
+
+        .wizard-title:active {
+          transform: scale(0.98);
+          transition: transform 0.1s ease;
+        }
+
+        .admin-access {
+          opacity: 1; /* Always visible on mobile */
+        }
+
+        /* Prevent unwanted zoom on mobile */
+        input, select, textarea {
+          font-size: 16px; /* Prevents zoom on iOS */
+        }
+
+        /* Better touch targets */
+        .nav-button {
+          min-height: 44px; /* iOS recommended touch target size */
+          padding: 12px 20px;
+        }
+
+        /* Optimize scroll performance */
+        .wizard-content {
+          will-change: scroll-position;
+          contain: layout style paint;
+        }
       }
 
       /* Progress Bar */
@@ -191,6 +242,10 @@
       .wizard-content {
         padding: 30px;
         min-height: 400px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+        overscroll-behavior: contain;
       }
 
       .step-content {
@@ -273,6 +328,11 @@
         font-size: 14px;
         transition: all 0.3s ease;
         background: white;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
       }
 
       input:focus,
@@ -524,6 +584,11 @@
           font-size: 20px;
         }
 
+        .admin-access {
+          font-size: 14px;
+          margin-left: 6px;
+        }
+
         .step-indicator {
           padding: 15px 20px;
         }
@@ -570,6 +635,20 @@
       }
 
       @media (max-width: 480px) {
+        .wizard-header {
+          padding: 15px 10px;
+        }
+
+        .wizard-title {
+          font-size: 18px;
+          text-align: center;
+        }
+
+        .admin-access {
+          font-size: 12px;
+          margin-left: 4px;
+        }
+
         .step-indicator {
           padding: 10px 15px;
         }
@@ -600,10 +679,106 @@
         }
       }
 
+      /* Extra small mobile devices */
+      @media (max-width: 320px) {
+        .wizard-header {
+          padding: 12px 8px;
+        }
+
+        .wizard-title {
+          font-size: 16px;
+          line-height: 1.2;
+        }
+
+        .admin-access {
+          font-size: 11px;
+          margin-left: 3px;
+        }
+
+        .step-indicator {
+          padding: 8px 10px;
+        }
+
+        .step-number {
+          width: 25px;
+          height: 25px;
+          font-size: 10px;
+        }
+
+        .step-title {
+          font-size: 8px;
+        }
+
+        .wizard-content {
+          padding: 12px 8px;
+          min-height: 320px;
+        }
+
+        .step-title-main {
+          font-size: 16px;
+        }
+
+        input,
+        select {
+          padding: 8px 10px;
+          font-size: 12px;
+        }
+
+        .nav-button {
+          min-width: 80px;
+          padding: 8px 12px;
+          font-size: 11px;
+        }
+
+        .wizard-navigation {
+          padding: 12px 15px;
+        }
+      }
+
       /* Touch Gestures for Mobile */
       @media (max-width: 768px) {
         .wizard-content {
-          touch-action: pan-x;
+          touch-action: pan-y;
+          -webkit-overflow-scrolling: touch;
+          scroll-behavior: smooth;
+          overscroll-behavior: contain;
+        }
+
+        .wizard-container {
+          -webkit-overflow-scrolling: touch;
+          scroll-behavior: smooth;
+          overscroll-behavior: contain;
+        }
+
+        .wizard-title {
+          -webkit-tap-highlight-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .wizard-title:active {
+          transform: scale(0.98);
+        }
+
+        /* Better scroll momentum for form fields */
+        input, select, textarea {
+          -webkit-overflow-scrolling: touch;
+          scroll-behavior: smooth;
+        }
+
+        /* Smooth scroll for step transitions */
+        .step-content {
+          scroll-behavior: smooth;
+          scroll-margin-top: 20px;
+        }
+
+        /* Enhanced momentum scrolling for dropdowns */
+        select {
+          -webkit-overflow-scrolling: touch;
+          overscroll-behavior: contain;
+        }
+
+        /* Improve focus states for mobile */
+        input:focus, select:focus, textarea:focus {
+          scroll-margin: 50px 0;
         }
       }
 
@@ -642,8 +817,17 @@
       <div class="wizard-container">
         <!-- Header -->
         <div class="wizard-header">
-          <h1 class="wizard-title">University Navigator</h1>
-          <a href="/admin/" target="_blank" class="admin-link">Admin Panel</a>
+          <h1
+            class="wizard-title"
+            onclick="handleHeaderClick(event)"
+            ontouchend="handleHeaderTouch(event)"
+          >
+            University Navigator
+            <span
+              class="admin-access"
+              title="Double-click for admin access"
+            ></span>
+          </h1>
         </div>
 
         <!-- Progress Bar -->
@@ -1875,6 +2059,52 @@
         }
       });
 
+      // Header click handler for admin access
+      function handleHeaderClick(event) {
+        // Prevent default on mobile to avoid zoom
+        event.preventDefault();
+
+        // Single click - refresh/reset form (optional)
+        if (event.detail === 1) {
+          setTimeout(() => {
+            if (event.detail === 1) {
+              // Only execute if it's truly a single click (not part of double click)
+              // Optional: Add single click functionality here
+            }
+          }, 200); // Delay to differentiate from double click
+        }
+
+        // Double click - access admin panel
+        if (event.detail === 2) {
+          if (confirm("Access admin panel? This will open in a new tab.")) {
+            window.open("/admin/", "_blank");
+          }
+        }
+      }
+
+      // Touch-friendly header access for mobile
+      let tapCount = 0;
+      let tapTimer = null;
+
+      function handleHeaderTouch(event) {
+        tapCount++;
+
+        if (tapCount === 1) {
+          tapTimer = setTimeout(() => {
+            // Single tap - do nothing or add functionality
+            tapCount = 0;
+          }, 300);
+        } else if (tapCount === 2) {
+          clearTimeout(tapTimer);
+          tapCount = 0;
+
+          // Double tap - access admin panel
+          if (confirm("Access admin panel? This will open in a new tab.")) {
+            window.open("/admin/", "_blank");
+          }
+        }
+      }
+
       // Step navigation
       function changeStep(direction) {
         if (direction === 1 && !validateCurrentStep()) {
@@ -1909,8 +2139,8 @@
           updateStepInfo();
           saveFormData();
 
-          // Scroll to top
-          document.querySelector(".wizard-content").scrollTop = 0;
+          // Smooth scroll to top using utility function
+          smoothScrollToTop();
         }
       }
 
@@ -1967,6 +2197,18 @@
             }
           }
         });
+
+        // If validation failed, scroll to first error field
+        if (!isValid) {
+          setTimeout(() => {
+            const firstErrorField = currentStepElement.querySelector(".form-group.error input, .form-group.error select");
+            if (firstErrorField) {
+              smoothScrollToElement(firstErrorField);
+              // Focus the field for better accessibility
+              firstErrorField.focus();
+            }
+          }, 100);
+        }
 
         return isValid;
       }
@@ -2027,15 +2269,26 @@
       // Touch events for mobile swipe
       function setupTouchEvents() {
         const wizardContent = document.querySelector(".wizard-content");
+        let touchStartY = 0;
 
         wizardContent.addEventListener("touchstart", function (e) {
           touchStartX = e.changedTouches[0].screenX;
-        });
+          touchStartY = e.changedTouches[0].screenY;
+        }, { passive: true });
 
         wizardContent.addEventListener("touchend", function (e) {
           touchEndX = e.changedTouches[0].screenX;
-          handleSwipe();
-        });
+          const touchEndY = e.changedTouches[0].screenY;
+
+          // Only handle horizontal swipes for step navigation
+          const horizontalDistance = Math.abs(touchStartX - touchEndX);
+          const verticalDistance = Math.abs(touchStartY - touchEndY);
+
+          // If horizontal swipe is more significant than vertical, handle step change
+          if (horizontalDistance > verticalDistance && horizontalDistance > 50) {
+            handleSwipe();
+          }
+        }, { passive: true });
       }
 
       function handleSwipe() {
@@ -2050,6 +2303,43 @@
             // Swipe right - previous step
             changeStep(-1);
           }
+        }
+      }
+
+      // Smooth scroll utility function
+      function smoothScrollToTop(element = null) {
+        const targetElement = element || document.querySelector(".wizard-content");
+
+        if (targetElement) {
+          // Modern browsers
+          if ('scrollTo' in targetElement) {
+            targetElement.scrollTo({
+              top: 0,
+              behavior: 'smooth'
+            });
+          } else {
+            // Fallback for older browsers
+            targetElement.scrollTop = 0;
+          }
+        }
+
+        // Also scroll the main window if needed
+        if (window.scrollY > 0) {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }
+
+      // Enhanced scroll to element function
+      function smoothScrollToElement(element) {
+        if (element) {
+          element.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+            inline: 'nearest'
+          });
         }
       }
 
@@ -2400,8 +2690,8 @@
         updateProgressBar();
         updateStepInfo();
 
-        // Scroll to top
-        document.querySelector(".wizard-content").scrollTop = 0;
+        // Smooth scroll to top using utility function
+        smoothScrollToTop();
       }
 
       async function submitFormData(formData) {
