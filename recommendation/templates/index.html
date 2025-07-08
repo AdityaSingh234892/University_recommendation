@@ -1,270 +1,2487 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     {% load static %}
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>University Recommendation</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>University Recommendation Wizard</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background: url('https://i.ibb.co/9Zqwr3g/university-bg.jpg') no-repeat center center fixed;
-            background-size: cover;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0;
+        background: url("https://i.ibb.co/9Zqwr3g/university-bg.jpg") no-repeat
+          center center fixed;
+        background-size: cover;
+        min-height: 100vh;
+        position: relative;
+      }
+
+      .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 1;
+      }
+
+      .container {
+        position: relative;
+        z-index: 2;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .wizard-container {
+        width: 100%;
+        max-width: 700px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        animation: slideIn 0.6s ease-out;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
         }
-        .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1;
+        to {
+          opacity: 1;
+          transform: translateY(0);
         }
-        .content {
-            z-index: 2;
-            position: relative;
-            width: 100%;
-            max-width: 600px;
-            background: rgba(255, 255, 255, 0.5); /* Semi-transparent white background */
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      /* Header */
+      .wizard-header {
+        background: linear-gradient(135deg, #4caf50, #45a049);
+        color: white;
+        padding: 25px;
+        text-align: center;
+        position: relative;
+      }
+
+      .wizard-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin: 0;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .admin-link {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        color: white;
+        text-decoration: none;
+        font-size: 12px;
+        opacity: 0.8;
+        transition: opacity 0.3s;
+      }
+
+      .admin-link:hover {
+        opacity: 1;
+      }
+
+      /* Progress Bar */
+      .progress-container {
+        background: #f0f0f0;
+        height: 6px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #4caf50, #45a049);
+        width: 25%;
+        transition: width 0.4s ease;
+        position: relative;
+      }
+
+      .progress-bar::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.4),
+          transparent
+        );
+        animation: shimmer 2s infinite;
+      }
+
+      @keyframes shimmer {
+        0% {
+          transform: translateX(-100%);
         }
-        h1 {
-            text-align: center;
-            font-size: 28px;
-            margin-bottom: 20px;
-            color: white; /* White text color */
-            background-color: #4CAF50; /* Green background color */
-            padding: 15px; /* Padding inside the box */
-            border-radius: 8px; /* Rounded corners */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Optional: Add a shadow for depth */
+        100% {
+          transform: translateX(100%);
         }
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 0px;
+      }
+
+      /* Step Indicator */
+      .step-indicator {
+        display: flex;
+        justify-content: space-between;
+        padding: 20px 30px;
+        background: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+      }
+
+      .step {
+        flex: 1;
+        text-align: center;
+        position: relative;
+      }
+
+      .step-number {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background: #ddd;
+        color: #666;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 8px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        font-size: 14px;
+      }
+
+      .step.active .step-number {
+        background: #4caf50;
+        color: white;
+        transform: scale(1.1);
+      }
+
+      .step.completed .step-number {
+        background: #45a049;
+        color: white;
+      }
+
+      .step-title {
+        font-size: 12px;
+        color: #666;
+        font-weight: 500;
+      }
+
+      .step.active .step-title {
+        color: #4caf50;
+        font-weight: bold;
+      }
+
+      /* Form Content */
+      .wizard-content {
+        padding: 30px;
+        min-height: 400px;
+      }
+
+      .step-content {
+        display: none;
+        animation: fadeIn 0.4s ease-in;
+      }
+
+      .step-content.active {
+        display: block;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateX(20px);
         }
-        form label {
-            font-weight: bold;
-            margin-bottom: 5px;
+        to {
+          opacity: 1;
+          transform: translateX(0);
         }
-        form input, form select {
-            width: 100%;
-            padding: 6px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+      }
+
+      .step-header {
+        margin-bottom: 25px;
+        text-align: center;
+      }
+
+      .step-icon {
+        font-size: 40px;
+        margin-bottom: 10px;
+        color: #4caf50;
+      }
+
+      .step-title-main {
+        font-size: 22px;
+        color: #333;
+        margin: 0 0 8px 0;
+        font-weight: bold;
+      }
+
+      .step-description {
+        color: #666;
+        font-size: 14px;
+        margin: 0;
+      }
+
+      /* Form Fields */
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-row {
+        display: flex;
+        gap: 15px;
+      }
+
+      .form-row .form-group {
+        flex: 1;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 6px;
+        color: #333;
+        font-weight: 600;
+        font-size: 14px;
+      }
+
+      .required {
+        color: #e74c3c;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        background: white;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        outline: none;
+        border-color: #4caf50;
+        box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        transform: translateY(-1px);
+      }
+
+      input::placeholder {
+        color: #adb5bd;
+        font-style: italic;
+      }
+
+      /* Error Messages */
+      .error-message {
+        color: #e74c3c;
+        font-size: 12px;
+        margin-top: 5px;
+        display: none;
+      }
+
+      .form-group.error input,
+      .form-group.error select {
+        border-color: #e74c3c;
+        box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+      }
+
+      .form-group.error .error-message {
+        display: block;
+      }
+
+      /* Help Text */
+      .help-text {
+        font-size: 12px;
+        color: #6c757d;
+        margin-top: 4px;
+        font-style: italic;
+      }
+
+      /* Navigation Buttons */
+      .wizard-navigation {
+        padding: 20px 30px;
+        background: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .nav-button {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        min-width: 120px;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #4caf50, #45a049);
+        color: white;
+        box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+      }
+
+      .btn-primary:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+      }
+
+      .btn-secondary {
+        background: #6c757d;
+        color: white;
+      }
+
+      .btn-secondary:hover:not(:disabled) {
+        background: #5a6268;
+        transform: translateY(-1px);
+      }
+
+      .btn-ghost {
+        background: transparent;
+        color: #6c757d;
+        border: 2px solid #e9ecef;
+      }
+
+      .btn-ghost:hover {
+        background: #f8f9fa;
+        border-color: #4caf50;
+        color: #4caf50;
+      }
+
+      .nav-button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none !important;
+      }
+
+      /* Loading Spinner */
+      .loading-spinner {
+        display: none;
+        text-align: center;
+        padding: 40px;
+      }
+
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #4caf50;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
         }
-        .btn {
-            display: inline-block;
-            padding: 12px 20px;
-            text-align: center;
-            font-size: 16px;
-            font-weight: bold;
-            color: white;
-            background: linear-gradient(90deg, #4CAF50, #45a049);
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        100% {
+          transform: rotate(360deg);
         }
-        .btn:hover {
-            background: linear-gradient(90deg, #45a049, #4CAF50);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      .loading-text {
+        color: #4caf50;
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      /* Results */
+      #recommendation-result {
+        margin-top: 20px;
+      }
+
+      .results-container {
+        background: white;
+        border-radius: 10px;
+        padding: 25px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .results-title {
+        color: #4caf50;
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      table th {
+        background: linear-gradient(135deg, #4caf50, #45a049);
+        color: white;
+        padding: 15px;
+        text-align: left;
+        font-weight: 600;
+      }
+
+      table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #e9ecef;
+      }
+
+      table tr:nth-child(even) {
+        background-color: #f8f9fa;
+      }
+
+      table tr:hover {
+        background-color: #e8f5e8;
+        transform: scale(1.01);
+        transition: all 0.2s ease;
+      }
+
+      .direct-apply-btn {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+        padding: 15px 30px;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 600;
+        margin: 20px auto;
+        display: block;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+      }
+
+      .direct-apply-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+      }
+
+      #direct-apply-options {
+        text-align: center;
+        margin-top: 15px;
+        display: none;
+        animation: fadeIn 0.4s ease;
+      }
+
+      #direct-apply-options a {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 20px;
+        text-decoration: none;
+        margin: 5px;
+        display: inline-block;
+        transition: all 0.3s ease;
+        font-weight: 500;
+      }
+
+      #direct-apply-options a:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+      }
+
+      /* Mobile Responsive */
+      @media (max-width: 768px) {
+        .container {
+          padding: 10px;
         }
-        #recommendation-result {
-            padding: 12px 20px;
-            margin-top: 20px;
+
+        .wizard-container {
+          max-width: 100%;
+          margin: 0;
         }
-        .loading {
-            color:rgb(6, 62, 8);
-            font-size: 25px;
-            font-weight: bold;
-            text-align: center;
+
+        .wizard-header {
+          padding: 20px 15px;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
+
+        .wizard-title {
+          font-size: 20px;
         }
-        table th, table td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: left;
+
+        .step-indicator {
+          padding: 15px 20px;
         }
-        table th {
-            background-color: #4CAF50;
-            color: white;
+
+        .step-title {
+          font-size: 10px;
         }
-        table tr:nth-child(even) {
-            background-color:rgb(255, 255, 255);
+
+        .wizard-content {
+          padding: 20px 15px;
         }
-        table tr:hover {
-            background-color:rgb(255, 255, 255);
+
+        .form-row {
+          flex-direction: column;
+          gap: 0;
         }
+
+        .nav-button {
+          min-width: 100px;
+          padding: 10px 16px;
+          font-size: 12px;
+        }
+
+        .wizard-navigation {
+          padding: 15px 20px;
+        }
+
+        table th,
+        table td {
+          padding: 8px;
+          font-size: 12px;
+        }
+
         .direct-apply-btn {
-            background-color:rgb(0, 159, 5);
-            color: white;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 20px;
-            display: block;
-            text-align: center;
-            margin-left: auto;
-            margin-right: auto;
+          padding: 12px 20px;
+          font-size: 14px;
         }
-        
-        .direct-apply-btn:hover {
-            background-color:rgb(0, 57, 3);
-        }
-        #direct-apply-options {
-            margin-top: 10px;
-            text-align: center;
-            display: none;
-        }
+
         #direct-apply-options a {
-            background-color: #008CBA;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 5px;
-            text-decoration: none;
-            margin: 5px;
-            display: inline-block;
+          padding: 10px 15px;
+          font-size: 12px;
+          margin: 3px;
         }
-        #direct-apply-options a:hover {
-            background-color: #005f73;
+      }
+
+      @media (max-width: 480px) {
+        .step-indicator {
+          padding: 10px 15px;
         }
-        @media (max-width: 480px) {
-            h1 {
-                font-size: 16px;
-                padding: 8px;
-            }
 
-            .content {
-                width: 100%;
-                padding: 10px;
-            }
-
-            form input, form select {
-                font-size: 12px;
-                padding: 6px;
-            }
-
-            .btn {
-                font-size: 12px;
-                padding: 8px;
-            }
-
-            table th, table td {
-                font-size: 10px;
-                padding: 5px;
-            }
-
-            .direct-apply-btn {
-                font-size: 12px;
-                padding: 8px;
-            }
+        .step-number {
+          width: 30px;
+          height: 30px;
+          font-size: 12px;
         }
+
+        .step-title {
+          font-size: 9px;
+        }
+
+        .wizard-content {
+          padding: 15px 10px;
+          min-height: 350px;
+        }
+
+        .step-title-main {
+          font-size: 18px;
+        }
+
+        input,
+        select {
+          padding: 10px 12px;
+          font-size: 13px;
+        }
+      }
+
+      /* Touch Gestures for Mobile */
+      @media (max-width: 768px) {
+        .wizard-content {
+          touch-action: pan-x;
+        }
+      }
+
+      /* Success/Error Messages */
+      .alert {
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border: 1px solid transparent;
+      }
+
+      .alert-success {
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+        color: #155724;
+      }
+
+      .alert-error {
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+        color: #721c24;
+      }
+
+      .alert-error .nav-button {
+        margin: 10px 5px 0 5px;
+        display: inline-block;
+        font-size: 12px;
+        padding: 8px 16px;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="overlay"></div>
-    <div class="content">
-        <h1> <a href="/admin/" target="_blank" style="text-decoration: none; color: white;">Find Your Best Fit University</a></h1>
-        <form method="post" id="recommendation-form">
+
+    <div class="container">
+      <div class="wizard-container">
+        <!-- Header -->
+        <div class="wizard-header">
+          <h1 class="wizard-title">University Navigator</h1>
+          <a href="/admin/" target="_blank" class="admin-link">Admin Panel</a>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-container">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <!-- Step Indicator -->
+        <div class="step-indicator">
+          <div class="step active" data-step="1">
+            <div class="step-number">1</div>
+            <div class="step-title">Personal Info</div>
+          </div>
+          <div class="step" data-step="2">
+            <div class="step-number">2</div>
+            <div class="step-title">Academic</div>
+          </div>
+          <div class="step" data-step="3">
+            <div class="step-number">3</div>
+            <div class="step-title">Test Scores</div>
+          </div>
+          <div class="step" data-step="4">
+            <div class="step-number">4</div>
+            <div class="step-title">Preferences</div>
+          </div>
+        </div>
+
+        <!-- Form Content -->
+        <div class="wizard-content">
+          <form method="post" id="recommendation-form">
             {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" class="btn">Get Recommendations</button>
-        </form>
-        <div id="recommendation-result"></div>
+
+            <!-- Step 1: Personal Information -->
+            <div class="step-content active" data-step="1">
+              <div class="step-header">
+                <div class="step-icon">👤</div>
+                <h2 class="step-title-main">Personal Information</h2>
+                <p class="step-description">
+                  Let's start with your basic details
+                </p>
+              </div>
+
+              <div class="form-group">
+                <label for="name"
+                  >Full Name <span class="required">*</span></label
+                >
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  placeholder="Enter your full name"
+                  required
+                />
+                <div class="error-message">Please enter your full name</div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="mobile"
+                    >Mobile Number <span class="required">*</span></label
+                  >
+                  <input
+                    type="text"
+                    id="mobile"
+                    name="mobile"
+                    placeholder="1234567890"
+                    maxlength="15"
+                    pattern="[0-9]{1,15}"
+                    title="Enter only digits (max 15)"
+                    oninput="this.value = this.value.replace(/\D/g, '').substring(0, 15);"
+                    required
+                  />
+                  <div class="error-message">
+                    Please enter a valid mobile number (max 15 digits)
+                  </div>
+                  <div class="help-text">Enter numbers only, no formatting</div>
+                </div>
+                <div class="form-group">
+                  <label for="email"
+                    >Email Address <span class="required">*</span></label
+                  >
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="your.email@example.com"
+                    required
+                  />
+                  <div class="error-message">
+                    Please enter a valid email address
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="Your_country"
+                  >Home Country <span class="required">*</span></label
+                >
+                <select id="Your_country" name="Your_country" required>
+                  <option value="">Select your country</option>
+                  <option value="AFG">Afghanistan</option>
+                  <option value="ALB">Albania</option>
+                  <option value="DZA">Algeria</option>
+                  <option value="AND">Andorra</option>
+                  <option value="AGO">Angola</option>
+                  <option value="ATG">Antigua and Barbuda</option>
+                  <option value="ARG">Argentina</option>
+                  <option value="ARM">Armenia</option>
+                  <option value="AUS">Australia</option>
+                  <option value="AUT">Austria</option>
+                  <option value="AZE">Azerbaijan</option>
+                  <option value="BHS">Bahamas</option>
+                  <option value="BHR">Bahrain</option>
+                  <option value="BGD">Bangladesh</option>
+                  <option value="BRB">Barbados</option>
+                  <option value="BLR">Belarus</option>
+                  <option value="BEL">Belgium</option>
+                  <option value="BLZ">Belize</option>
+                  <option value="BEN">Benin</option>
+                  <option value="BTN">Bhutan</option>
+                  <option value="BOL">Bolivia</option>
+                  <option value="BIH">Bosnia and Herzegovina</option>
+                  <option value="BWA">Botswana</option>
+                  <option value="BRA">Brazil</option>
+                  <option value="BRN">Brunei</option>
+                  <option value="BGR">Bulgaria</option>
+                  <option value="BFA">Burkina Faso</option>
+                  <option value="BDI">Burundi</option>
+                  <option value="CPV">Cabo Verde</option>
+                  <option value="KHM">Cambodia</option>
+                  <option value="CMR">Cameroon</option>
+                  <option value="CAN">Canada</option>
+                  <option value="CAF">Central African Republic</option>
+                  <option value="TCD">Chad</option>
+                  <option value="CHL">Chile</option>
+                  <option value="CHN">China</option>
+                  <option value="COL">Colombia</option>
+                  <option value="COM">Comoros</option>
+                  <option value="COG">Congo</option>
+                  <option value="CRI">Costa Rica</option>
+                  <option value="HRV">Croatia</option>
+                  <option value="CUB">Cuba</option>
+                  <option value="CYP">Cyprus</option>
+                  <option value="CZE">Czech Republic</option>
+                  <option value="DNK">Denmark</option>
+                  <option value="DJI">Djibouti</option>
+                  <option value="DMA">Dominica</option>
+                  <option value="DOM">Dominican Republic</option>
+                  <option value="ECU">Ecuador</option>
+                  <option value="EGY">Egypt</option>
+                  <option value="SLV">El Salvador</option>
+                  <option value="GNQ">Equatorial Guinea</option>
+                  <option value="ERI">Eritrea</option>
+                  <option value="EST">Estonia</option>
+                  <option value="SWZ">Eswatini</option>
+                  <option value="ETH">Ethiopia</option>
+                  <option value="FJI">Fiji</option>
+                  <option value="FIN">Finland</option>
+                  <option value="FRA">France</option>
+                  <option value="GAB">Gabon</option>
+                  <option value="GMB">Gambia</option>
+                  <option value="GEO">Georgia</option>
+                  <option value="DEU">Germany</option>
+                  <option value="GHA">Ghana</option>
+                  <option value="GRC">Greece</option>
+                  <option value="GRD">Grenada</option>
+                  <option value="GTM">Guatemala</option>
+                  <option value="GIN">Guinea</option>
+                  <option value="GNB">Guinea-Bissau</option>
+                  <option value="GUY">Guyana</option>
+                  <option value="HTI">Haiti</option>
+                  <option value="HND">Honduras</option>
+                  <option value="HUN">Hungary</option>
+                  <option value="ISL">Iceland</option>
+                  <option value="IND">India</option>
+                  <option value="IDN">Indonesia</option>
+                  <option value="IRN">Iran</option>
+                  <option value="IRQ">Iraq</option>
+                  <option value="IRL">Ireland</option>
+                  <option value="ISR">Israel</option>
+                  <option value="ITA">Italy</option>
+                  <option value="JAM">Jamaica</option>
+                  <option value="JPN">Japan</option>
+                  <option value="JOR">Jordan</option>
+                  <option value="KAZ">Kazakhstan</option>
+                  <option value="KEN">Kenya</option>
+                  <option value="KIR">Kiribati</option>
+                  <option value="PRK">North Korea</option>
+                  <option value="KOR">South Korea</option>
+                  <option value="KWT">Kuwait</option>
+                  <option value="KGZ">Kyrgyzstan</option>
+                  <option value="LAO">Laos</option>
+                  <option value="LVA">Latvia</option>
+                  <option value="LBN">Lebanon</option>
+                  <option value="LSO">Lesotho</option>
+                  <option value="LBR">Liberia</option>
+                  <option value="LBY">Libya</option>
+                  <option value="LIE">Liechtenstein</option>
+                  <option value="LTU">Lithuania</option>
+                  <option value="LUX">Luxembourg</option>
+                  <option value="MDG">Madagascar</option>
+                  <option value="MWI">Malawi</option>
+                  <option value="MYS">Malaysia</option>
+                  <option value="MDV">Maldives</option>
+                  <option value="MLI">Mali</option>
+                  <option value="MLT">Malta</option>
+                  <option value="MHL">Marshall Islands</option>
+                  <option value="MRT">Mauritania</option>
+                  <option value="MUS">Mauritius</option>
+                  <option value="MEX">Mexico</option>
+                  <option value="FSM">Micronesia</option>
+                  <option value="MDA">Moldova</option>
+                  <option value="MCO">Monaco</option>
+                  <option value="MNG">Mongolia</option>
+                  <option value="MNE">Montenegro</option>
+                  <option value="MAR">Morocco</option>
+                  <option value="MOZ">Mozambique</option>
+                  <option value="MMR">Myanmar</option>
+                  <option value="NAM">Namibia</option>
+                  <option value="NRU">Nauru</option>
+                  <option value="NPL">Nepal</option>
+                  <option value="NLD">Netherlands</option>
+                  <option value="NZL">New Zealand</option>
+                  <option value="NIC">Nicaragua</option>
+                  <option value="NER">Niger</option>
+                  <option value="NGA">Nigeria</option>
+                  <option value="MKD">North Macedonia</option>
+                  <option value="NOR">Norway</option>
+                  <option value="OMN">Oman</option>
+                  <option value="PAK">Pakistan</option>
+                  <option value="PLW">Palau</option>
+                  <option value="PAN">Panama</option>
+                  <option value="PNG">Papua New Guinea</option>
+                  <option value="PRY">Paraguay</option>
+                  <option value="PER">Peru</option>
+                  <option value="PHL">Philippines</option>
+                  <option value="POL">Poland</option>
+                  <option value="PRT">Portugal</option>
+                  <option value="QAT">Qatar</option>
+                  <option value="ROU">Romania</option>
+                  <option value="RUS">Russia</option>
+                  <option value="RWA">Rwanda</option>
+                  <option value="KNA">Saint Kitts and Nevis</option>
+                  <option value="LCA">Saint Lucia</option>
+                  <option value="VCT">Saint Vincent and the Grenadines</option>
+                  <option value="WSM">Samoa</option>
+                  <option value="SMR">San Marino</option>
+                  <option value="STP">Sao Tome and Principe</option>
+                  <option value="SAU">Saudi Arabia</option>
+                  <option value="SEN">Senegal</option>
+                  <option value="SRB">Serbia</option>
+                  <option value="SYC">Seychelles</option>
+                  <option value="SLE">Sierra Leone</option>
+                  <option value="SGP">Singapore</option>
+                  <option value="SVK">Slovakia</option>
+                  <option value="SVN">Slovenia</option>
+                  <option value="SLB">Solomon Islands</option>
+                  <option value="SOM">Somalia</option>
+                  <option value="ZAF">South Africa</option>
+                  <option value="ESP">Spain</option>
+                  <option value="LKA">Sri Lanka</option>
+                  <option value="SDN">Sudan</option>
+                  <option value="SUR">Suriname</option>
+                  <option value="SWE">Sweden</option>
+                  <option value="CHE">Switzerland</option>
+                  <option value="SYR">Syria</option>
+                  <option value="TJK">Tajikistan</option>
+                  <option value="TZA">Tanzania</option>
+                  <option value="THA">Thailand</option>
+                  <option value="TLS">Timor-Leste</option>
+                  <option value="TGO">Togo</option>
+                  <option value="TON">Tonga</option>
+                  <option value="TTO">Trinidad and Tobago</option>
+                  <option value="TUN">Tunisia</option>
+                  <option value="TUR">Turkey</option>
+                  <option value="TKM">Turkmenistan</option>
+                  <option value="TUV">Tuvalu</option>
+                  <option value="UGA">Uganda</option>
+                  <option value="UKR">Ukraine</option>
+                  <option value="ARE">United Arab Emirates</option>
+                  <option value="GBR">United Kingdom</option>
+                  <option value="USA">United States</option>
+                  <option value="URY">Uruguay</option>
+                  <option value="UZB">Uzbekistan</option>
+                  <option value="VUT">Vanuatu</option>
+                  <option value="VEN">Venezuela</option>
+                  <option value="VNM">Vietnam</option>
+                  <option value="YEM">Yemen</option>
+                  <option value="ZMB">Zambia</option>
+                  <option value="ZWE">Zimbabwe</option>
+                </select>
+                <div class="error-message">Please select your country</div>
+              </div>
+            </div>
+
+            <!-- Step 2: Academic Background -->
+            <div class="step-content" data-step="2">
+              <div class="step-header">
+                <div class="step-icon">🎓</div>
+                <h2 class="step-title-main">Academic Background</h2>
+                <p class="step-description">
+                  Tell us about your educational history
+                </p>
+              </div>
+
+              <div class="form-group">
+                <label for="board"
+                  >High School Board <span class="required">*</span></label
+                >
+                <select id="board" name="board" required>
+                  <option value="">Select your board</option>
+                  <option value="CBSE">CBSE</option>
+                  <option value="ICSE">ICSE</option>
+                  <option value="State Board">State Board</option>
+                  <option value="IB">International Baccalaureate (IB)</option>
+                  <option value="A-Levels">A-Levels</option>
+                  <option value="High School Diploma">
+                    High School Diploma
+                  </option>
+                  <option value="Other">Other</option>
+                </select>
+                <div class="error-message">
+                  Please select your high school board
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="tenth_percentage"
+                    >10th Grade Percentage
+                    <span class="required">*</span></label
+                  >
+                  <input
+                    type="number"
+                    id="tenth_percentage"
+                    name="tenth_percentage"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    placeholder="85.5"
+                    required
+                  />
+                  <div class="help-text">Enter percentage (0-100)</div>
+                  <div class="error-message">
+                    Please enter a valid percentage (0-100)
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="twelveth_percentage"
+                    >12th Grade Percentage
+                    <span class="required">*</span></label
+                  >
+                  <input
+                    type="number"
+                    id="twelveth_percentage"
+                    name="twelveth_percentage"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    placeholder="87.2"
+                    required
+                  />
+                  <div class="help-text">Enter percentage (0-100)</div>
+                  <div class="error-message">
+                    Please enter a valid percentage (0-100)
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="bachelors_course">Bachelor's Course</label>
+                <input
+                  type="text"
+                  id="bachelors_course"
+                  name="bachelors_course"
+                  placeholder="e.g., Computer Science, Business Administration"
+                />
+                <div class="help-text">Leave blank if not applicable</div>
+              </div>
+
+              <div class="form-group">
+                <label for="gpa_score">GPA Score</label>
+                <input
+                  type="text"
+                  id="gpa_score"
+                  name="gpa_score"
+                  placeholder="3.75"
+                />
+                <div class="help-text">
+                  On a 4.0 scale (leave blank if not applicable)
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 3: Test Scores -->
+            <div class="step-content" data-step="3">
+              <div class="step-header">
+                <div class="step-icon">📝</div>
+                <h2 class="step-title-main">Test Scores</h2>
+                <p class="step-description">
+                  Share your standardized test scores
+                </p>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="toefl_score">TOEFL/IELTS Score</label>
+                  <input
+                    type="text"
+                    id="toefl_score"
+                    name="toefl_score"
+                    placeholder="100 (TOEFL) or 7.5 (IELTS)"
+                  />
+                  <div class="help-text">
+                    Enter TOEFL (0-120) or IELTS (0-9) score
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="Duolingo_PTE">DUOLINGO/PTE Score</label>
+                  <input
+                    type="text"
+                    id="Duolingo_PTE"
+                    name="Duolingo_PTE"
+                    placeholder="120 (Duolingo) or 65 (PTE)"
+                  />
+                  <div class="help-text">
+                    Enter Duolingo (10-160) or PTE (10-90) score
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="gre_score">GRE Score</label>
+                <input
+                  type="text"
+                  id="gre_score"
+                  name="gre_score"
+                  placeholder="320"
+                />
+                <div class="help-text">Enter GRE score (260-340)</div>
+              </div>
+
+              <div
+                class="alert alert-info"
+                style="
+                  background-color: #e3f2fd;
+                  border-color: #bbdefb;
+                  color: #0d47a1;
+                  margin-top: 20px;
+                "
+              >
+                <strong>Note:</strong> Test scores are optional but help us
+                provide better recommendations. Leave blank if you haven't taken
+                these tests yet.
+              </div>
+            </div>
+
+            <!-- Step 4: Preferences -->
+            <div class="step-content" data-step="4">
+              <div class="step-header">
+                <div class="step-icon">🎯</div>
+                <h2 class="step-title-main">Your Preferences</h2>
+                <p class="step-description">
+                  Tell us about your study preferences
+                </p>
+              </div>
+
+              <div class="form-group">
+                <label for="country"
+                  >Preferred Country <span class="required">*</span></label
+                >
+                <select id="country" name="country" required>
+                  <option value="">Select preferred country</option>
+                  <option value="AFG">Afghanistan</option>
+                  <option value="ALB">Albania</option>
+                  <option value="DZA">Algeria</option>
+                  <option value="AND">Andorra</option>
+                  <option value="AGO">Angola</option>
+                  <option value="ATG">Antigua and Barbuda</option>
+                  <option value="ARG">Argentina</option>
+                  <option value="ARM">Armenia</option>
+                  <option value="AUS">Australia</option>
+                  <option value="AUT">Austria</option>
+                  <option value="AZE">Azerbaijan</option>
+                  <option value="BHS">Bahamas</option>
+                  <option value="BHR">Bahrain</option>
+                  <option value="BGD">Bangladesh</option>
+                  <option value="BRB">Barbados</option>
+                  <option value="BLR">Belarus</option>
+                  <option value="BEL">Belgium</option>
+                  <option value="BLZ">Belize</option>
+                  <option value="BEN">Benin</option>
+                  <option value="BTN">Bhutan</option>
+                  <option value="BOL">Bolivia</option>
+                  <option value="BIH">Bosnia and Herzegovina</option>
+                  <option value="BWA">Botswana</option>
+                  <option value="BRA">Brazil</option>
+                  <option value="BRN">Brunei</option>
+                  <option value="BGR">Bulgaria</option>
+                  <option value="BFA">Burkina Faso</option>
+                  <option value="BDI">Burundi</option>
+                  <option value="CPV">Cabo Verde</option>
+                  <option value="KHM">Cambodia</option>
+                  <option value="CMR">Cameroon</option>
+                  <option value="CAN">Canada</option>
+                  <option value="CAF">Central African Republic</option>
+                  <option value="TCD">Chad</option>
+                  <option value="CHL">Chile</option>
+                  <option value="CHN">China</option>
+                  <option value="COL">Colombia</option>
+                  <option value="COM">Comoros</option>
+                  <option value="COG">Congo</option>
+                  <option value="CRI">Costa Rica</option>
+                  <option value="HRV">Croatia</option>
+                  <option value="CUB">Cuba</option>
+                  <option value="CYP">Cyprus</option>
+                  <option value="CZE">Czech Republic</option>
+                  <option value="DNK">Denmark</option>
+                  <option value="DJI">Djibouti</option>
+                  <option value="DMA">Dominica</option>
+                  <option value="DOM">Dominican Republic</option>
+                  <option value="ECU">Ecuador</option>
+                  <option value="EGY">Egypt</option>
+                  <option value="SLV">El Salvador</option>
+                  <option value="GNQ">Equatorial Guinea</option>
+                  <option value="ERI">Eritrea</option>
+                  <option value="EST">Estonia</option>
+                  <option value="SWZ">Eswatini</option>
+                  <option value="ETH">Ethiopia</option>
+                  <option value="FJI">Fiji</option>
+                  <option value="FIN">Finland</option>
+                  <option value="FRA">France</option>
+                  <option value="GAB">Gabon</option>
+                  <option value="GMB">Gambia</option>
+                  <option value="GEO">Georgia</option>
+                  <option value="DEU">Germany</option>
+                  <option value="GHA">Ghana</option>
+                  <option value="GRC">Greece</option>
+                  <option value="GRD">Grenada</option>
+                  <option value="GTM">Guatemala</option>
+                  <option value="GIN">Guinea</option>
+                  <option value="GNB">Guinea-Bissau</option>
+                  <option value="GUY">Guyana</option>
+                  <option value="HTI">Haiti</option>
+                  <option value="HND">Honduras</option>
+                  <option value="HUN">Hungary</option>
+                  <option value="ISL">Iceland</option>
+                  <option value="IND">India</option>
+                  <option value="IDN">Indonesia</option>
+                  <option value="IRN">Iran</option>
+                  <option value="IRQ">Iraq</option>
+                  <option value="IRL">Ireland</option>
+                  <option value="ISR">Israel</option>
+                  <option value="ITA">Italy</option>
+                  <option value="JAM">Jamaica</option>
+                  <option value="JPN">Japan</option>
+                  <option value="JOR">Jordan</option>
+                  <option value="KAZ">Kazakhstan</option>
+                  <option value="KEN">Kenya</option>
+                  <option value="KIR">Kiribati</option>
+                  <option value="PRK">North Korea</option>
+                  <option value="KOR">South Korea</option>
+                  <option value="KWT">Kuwait</option>
+                  <option value="KGZ">Kyrgyzstan</option>
+                  <option value="LAO">Laos</option>
+                  <option value="LVA">Latvia</option>
+                  <option value="LBN">Lebanon</option>
+                  <option value="LSO">Lesotho</option>
+                  <option value="LBR">Liberia</option>
+                  <option value="LBY">Libya</option>
+                  <option value="LIE">Liechtenstein</option>
+                  <option value="LTU">Lithuania</option>
+                  <option value="LUX">Luxembourg</option>
+                  <option value="MDG">Madagascar</option>
+                  <option value="MWI">Malawi</option>
+                  <option value="MYS">Malaysia</option>
+                  <option value="MDV">Maldives</option>
+                  <option value="MLI">Mali</option>
+                  <option value="MLT">Malta</option>
+                  <option value="MHL">Marshall Islands</option>
+                  <option value="MRT">Mauritania</option>
+                  <option value="MUS">Mauritius</option>
+                  <option value="MEX">Mexico</option>
+                  <option value="FSM">Micronesia</option>
+                  <option value="MDA">Moldova</option>
+                  <option value="MCO">Monaco</option>
+                  <option value="MNG">Mongolia</option>
+                  <option value="MNE">Montenegro</option>
+                  <option value="MAR">Morocco</option>
+                  <option value="MOZ">Mozambique</option>
+                  <option value="MMR">Myanmar</option>
+                  <option value="NAM">Namibia</option>
+                  <option value="NRU">Nauru</option>
+                  <option value="NPL">Nepal</option>
+                  <option value="NLD">Netherlands</option>
+                  <option value="NZL">New Zealand</option>
+                  <option value="NIC">Nicaragua</option>
+                  <option value="NER">Niger</option>
+                  <option value="NGA">Nigeria</option>
+                  <option value="MKD">North Macedonia</option>
+                  <option value="NOR">Norway</option>
+                  <option value="OMN">Oman</option>
+                  <option value="PAK">Pakistan</option>
+                  <option value="PLW">Palau</option>
+                  <option value="PAN">Panama</option>
+                  <option value="PNG">Papua New Guinea</option>
+                  <option value="PRY">Paraguay</option>
+                  <option value="PER">Peru</option>
+                  <option value="PHL">Philippines</option>
+                  <option value="POL">Poland</option>
+                  <option value="PRT">Portugal</option>
+                  <option value="QAT">Qatar</option>
+                  <option value="ROU">Romania</option>
+                  <option value="RUS">Russia</option>
+                  <option value="RWA">Rwanda</option>
+                  <option value="KNA">Saint Kitts and Nevis</option>
+                  <option value="LCA">Saint Lucia</option>
+                  <option value="VCT">Saint Vincent and the Grenadines</option>
+                  <option value="WSM">Samoa</option>
+                  <option value="SMR">San Marino</option>
+                  <option value="STP">Sao Tome and Principe</option>
+                  <option value="SAU">Saudi Arabia</option>
+                  <option value="SEN">Senegal</option>
+                  <option value="SRB">Serbia</option>
+                  <option value="SYC">Seychelles</option>
+                  <option value="SLE">Sierra Leone</option>
+                  <option value="SGP">Singapore</option>
+                  <option value="SVK">Slovakia</option>
+                  <option value="SVN">Slovenia</option>
+                  <option value="SLB">Solomon Islands</option>
+                  <option value="SOM">Somalia</option>
+                  <option value="ZAF">South Africa</option>
+                  <option value="ESP">Spain</option>
+                  <option value="LKA">Sri Lanka</option>
+                  <option value="SDN">Sudan</option>
+                  <option value="SUR">Suriname</option>
+                  <option value="SWE">Sweden</option>
+                  <option value="CHE">Switzerland</option>
+                  <option value="SYR">Syria</option>
+                  <option value="TJK">Tajikistan</option>
+                  <option value="TZA">Tanzania</option>
+                  <option value="THA">Thailand</option>
+                  <option value="TLS">Timor-Leste</option>
+                  <option value="TGO">Togo</option>
+                  <option value="TON">Tonga</option>
+                  <option value="TTO">Trinidad and Tobago</option>
+                  <option value="TUN">Tunisia</option>
+                  <option value="TUR">Turkey</option>
+                  <option value="TKM">Turkmenistan</option>
+                  <option value="TUV">Tuvalu</option>
+                  <option value="UGA">Uganda</option>
+                  <option value="UKR">Ukraine</option>
+                  <option value="ARE">United Arab Emirates</option>
+                  <option value="GBR">United Kingdom</option>
+                  <option value="USA">United States</option>
+                  <option value="URY">Uruguay</option>
+                  <option value="UZB">Uzbekistan</option>
+                  <option value="VUT">Vanuatu</option>
+                  <option value="VEN">Venezuela</option>
+                  <option value="VNM">Vietnam</option>
+                  <option value="YEM">Yemen</option>
+                  <option value="ZMB">Zambia</option>
+                  <option value="ZWE">Zimbabwe</option>
+                </select>
+                <div class="error-message">
+                  Please select your preferred country
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="degree"
+                    >Program Level <span class="required">*</span></label
+                  >
+                  <select id="degree" name="degree" required>
+                    <option value="">Select Degree</option>
+                    <option value="UG">UnderGraduate</option>
+                    <option value="PG">PostGraduate</option>
+                    <option value="Diploma">Diploma</option>
+                    <option value="PHD">PHD</option>
+                  </select>
+                  <div class="error-message">Please select program level</div>
+                </div>
+                <div class="form-group">
+                  <label for="preferred_course"
+                    >Preferred Course <span class="required">*</span></label
+                  >
+                  <select
+                    id="preferred_course"
+                    name="preferred_course"
+                    required
+                  >
+                    <option value="">Select Preferred Course For Study</option>
+
+                    <!-- Engineering Courses -->
+                    <option value="CSE">
+                      Computer Science and Engineering
+                    </option>
+                    <option value="ME">Mechanical Engineering</option>
+                    <option value="CE">Civil Engineering</option>
+                    <option value="EEE">
+                      Electrical and Electronics Engineering
+                    </option>
+                    <option value="ECE">
+                      Electronics and Communication Engineering
+                    </option>
+                    <option value="Aero">Aerospace Engineering</option>
+                    <option value="Chem">Chemical Engineering</option>
+                    <option value="Biotech">Biotechnology Engineering</option>
+                    <option value="IT">Information Technology</option>
+                    <option value="AI">Artificial Intelligence</option>
+                    <option value="ML">Machine Learning</option>
+                    <option value="DS">Data Science</option>
+                    <option value="CS">Cyber Security</option>
+                    <option value="Auto">Automobile Engineering</option>
+                    <option value="Mechatronics">
+                      Mechatronics Engineering
+                    </option>
+                    <option value="Petro">Petroleum Engineering</option>
+                    <option value="Mining">Mining Engineering</option>
+                    <option value="Agri">Agricultural Engineering</option>
+                    <option value="Env">Environmental Engineering</option>
+                    <option value="IE">Industrial Engineering</option>
+                    <option value="Marine">Marine Engineering</option>
+                    <option value="Textile">Textile Engineering</option>
+                    <option value="Nano">Nanotechnology</option>
+                    <option value="Robotics">Robotics Engineering</option>
+                    <option value="Pharma">Pharmaceutical Engineering</option>
+                    <option value="Metallurgy">
+                      Metallurgical Engineering
+                    </option>
+                    <option value="Geo">Geotechnical Engineering</option>
+                    <option value="Renewable">
+                      Renewable Energy Engineering
+                    </option>
+                    <option value="Nuclear">Nuclear Engineering</option>
+
+                    <!-- Medical Courses -->
+                    <option value="MBBS">
+                      Bachelor of Medicine and Bachelor of Surgery
+                    </option>
+                    <option value="BDS">Bachelor of Dental Surgery</option>
+                    <option value="BScN">Bachelor of Science in Nursing</option>
+                    <option value="BPharm">Bachelor of Pharmacy</option>
+                    <option value="BPT">Bachelor of Physiotherapy</option>
+                    <option value="BMLT">
+                      Bachelor of Medical Laboratory Technology
+                    </option>
+                    <option value="BAMS">
+                      Bachelor of Ayurvedic Medicine and Surgery
+                    </option>
+                    <option value="BHMS">
+                      Bachelor of Homeopathic Medicine and Surgery
+                    </option>
+                    <option value="BUMS">
+                      Bachelor of Unani Medicine and Surgery
+                    </option>
+                    <option value="BVSc">Bachelor of Veterinary Science</option>
+
+                    <!-- Arts Courses -->
+                    <option value="BAEng">Bachelor of Arts in English</option>
+                    <option value="BAHis">Bachelor of Arts in History</option>
+                    <option value="BAPsy">
+                      Bachelor of Arts in Psychology
+                    </option>
+                    <option value="BASoc">Bachelor of Arts in Sociology</option>
+                    <option value="BAEco">Bachelor of Arts in Economics</option>
+                    <option value="BAPol">
+                      Bachelor of Arts in Political Science
+                    </option>
+                    <option value="BAPhil">
+                      Bachelor of Arts in Philosophy
+                    </option>
+                    <option value="BAJour">
+                      Bachelor of Arts in Journalism
+                    </option>
+                    <option value="BALit">
+                      Bachelor of Arts in Literature
+                    </option>
+                    <option value="BALang">
+                      Bachelor of Arts in Languages
+                    </option>
+
+                    <!-- Science Courses -->
+                    <option value="BScPhy">
+                      Bachelor of Science in Physics
+                    </option>
+                    <option value="BScChem">
+                      Bachelor of Science in Chemistry
+                    </option>
+                    <option value="BScMath">
+                      Bachelor of Science in Mathematics
+                    </option>
+                    <option value="BScBio">
+                      Bachelor of Science in Biology
+                    </option>
+                    <option value="BScCS">
+                      Bachelor of Science in Computer Science
+                    </option>
+                    <option value="BScEnv">
+                      Bachelor of Science in Environmental Science
+                    </option>
+                    <option value="BScStat">
+                      Bachelor of Science in Statistics
+                    </option>
+                    <option value="BScMicro">
+                      Bachelor of Science in Microbiology
+                    </option>
+                    <option value="BScBiotech">
+                      Bachelor of Science in Biotechnology
+                    </option>
+                    <option value="BScGeology">
+                      Bachelor of Science in Geology
+                    </option>
+
+                    <!-- Commerce & Business Courses -->
+                    <option value="BCom">Bachelor of Commerce</option>
+                    <option value="BBA">
+                      Bachelor of Business Administration
+                    </option>
+                    <option value="CA">Chartered Accountancy</option>
+                    <option value="CMA">Cost and Management Accounting</option>
+                    <option value="CFA">Chartered Financial Analyst</option>
+                    <option value="BComAcc">
+                      Bachelor of Commerce in Accounting
+                    </option>
+                    <option value="BComFin">
+                      Bachelor of Commerce in Finance
+                    </option>
+                    <option value="BComTax">
+                      Bachelor of Commerce in Taxation
+                    </option>
+                    <option value="BComMkt">
+                      Bachelor of Commerce in Marketing
+                    </option>
+                    <option value="BComIB">
+                      Bachelor of Commerce in International Business
+                    </option>
+
+                    <!-- Law Courses -->
+                    <option value="LLB">Bachelor of Laws</option>
+                    <option value="BA LLB">
+                      Bachelor of Arts and Bachelor of Laws
+                    </option>
+                    <option value="BBA LLB">
+                      Bachelor of Business Administration and Bachelor of Laws
+                    </option>
+                    <option value="LLM">Master of Laws</option>
+                    <option value="Criminology">
+                      Criminology and Criminal Justice
+                    </option>
+                    <option value="Corporate Law">Corporate Law</option>
+                    <option value="IntlLaw">International Law</option>
+                    <option value="HumanRights">Human Rights Law</option>
+                    <option value="IPLaw">Intellectual Property Law</option>
+                    <option value="EnvLaw">Environmental Law</option>
+
+                    <!-- Design & Architecture Courses -->
+                    <option value="BArch">Bachelor of Architecture</option>
+                    <option value="BDes">Bachelor of Design</option>
+                    <option value="FashionDes">Fashion Design</option>
+                    <option value="IntDes">Interior Design</option>
+                    <option value="GraphicDes">Graphic Design</option>
+                    <option value="Anim">Animation and Multimedia</option>
+                    <option value="ProdDes">Product Design</option>
+                    <option value="GameDes">Game Design</option>
+                    <option value="UrbanDes">Urban Design</option>
+                    <option value="LandArch">Landscape Architecture</option>
+
+                    <!-- Master's in Business -->
+                    <option value="MBA">
+                      Master of Business Administration
+                    </option>
+                    <option value="MSM">Master of Science in Management</option>
+                    <option value="MFin">Master of Finance</option>
+                    <option value="MAcc">Master of Accounting</option>
+                    <option value="MMkt">Master of Marketing</option>
+                    <option value="MHRM">
+                      Master of Human Resource Management
+                    </option>
+                    <option value="MSCM">
+                      Master of Supply Chain Management
+                    </option>
+                    <option value="MIB">
+                      Master of International Business
+                    </option>
+                    <option value="MPM">Master of Project Management</option>
+
+                    <!-- Master's in Engineering -->
+                    <option value="MSE">
+                      Master of Science in Engineering
+                    </option>
+                    <option value="MEng">Master of Engineering</option>
+                    <option value="MSCS">
+                      Master of Science in Computer Science
+                    </option>
+                    <option value="MSIT">
+                      Master of Science in Information Technology
+                    </option>
+                    <option value="MSDS">
+                      Master of Science in Data Science
+                    </option>
+                    <option value="MSAI">
+                      Master of Science in Artificial Intelligence
+                    </option>
+                    <option value="MSCyber">
+                      Master of Science in Cybersecurity
+                    </option>
+                    <option value="MSEE">
+                      Master of Science in Electrical Engineering
+                    </option>
+                    <option value="MSME">
+                      Master of Science in Mechanical Engineering
+                    </option>
+                    <option value="MSCE">
+                      Master of Science in Civil Engineering
+                    </option>
+                    <option value="MSAE">
+                      Master of Science in Aerospace Engineering
+                    </option>
+                    <option value="MSBME">
+                      Master of Science in Biomedical Engineering
+                    </option>
+
+                    <!-- Master's in Science -->
+                    <option value="MSP">Master of Science in Physics</option>
+                    <option value="MSC">Master of Science in Chemistry</option>
+                    <option value="MSB">Master of Science in Biology</option>
+                    <option value="MSMath">
+                      Master of Science in Mathematics
+                    </option>
+                    <option value="MSES">
+                      Master of Science in Environmental Science
+                    </option>
+                    <option value="MSBT">
+                      Master of Science in Biotechnology
+                    </option>
+                    <option value="MSG">Master of Science in Geology</option>
+                    <option value="MSA">Master of Science in Astronomy</option>
+
+                    <!-- Master's in Arts -->
+                    <option value="MAP">Master of Arts in Psychology</option>
+                    <option value="MAS">Master of Arts in Sociology</option>
+                    <option value="MAPS">
+                      Master of Arts in Political Science
+                    </option>
+                    <option value="MAH">Master of Arts in History</option>
+                    <option value="MAE">Master of Arts in Economics</option>
+                    <option value="MAA">Master of Arts in Anthropology</option>
+                    <option value="MAPh">Master of Arts in Philosophy</option>
+                    <option value="MAIR">
+                      Master of Arts in International Relations
+                    </option>
+                    <option value="MAC">Master of Arts in Communication</option>
+                    <option value="MAL">Master of Arts in Linguistics</option>
+
+                    <!-- Education -->
+                    <option value="MEd">Master of Education</option>
+                    <option value="MAT">Master of Arts in Teaching</option>
+                    <option value="MSEd">Master of Science in Education</option>
+                    <option value="MACI">
+                      Master of Arts in Curriculum and Instruction
+                    </option>
+                    <option value="MAEL">
+                      Master of Arts in Educational Leadership
+                    </option>
+                    <option value="MASE">
+                      Master of Arts in Special Education
+                    </option>
+
+                    <!-- Health Sciences -->
+                    <option value="MSN">Master of Science in Nursing</option>
+                    <option value="MPH">Master of Public Health</option>
+                    <option value="MSPH">
+                      Master of Science in Public Health
+                    </option>
+                    <option value="MHA">Master of Health Administration</option>
+                    <option value="MSCR">
+                      Master of Science in Clinical Research
+                    </option>
+                    <option value="MSNutr">
+                      Master of Science in Nutrition
+                    </option>
+                    <option value="MSPharm">
+                      Master of Science in Pharmacy
+                    </option>
+                    <option value="MSOT">
+                      Master of Science in Occupational Therapy
+                    </option>
+                    <option value="MSPT">
+                      Master of Science in Physical Therapy
+                    </option>
+
+                    <!-- Fine Arts -->
+                    <option value="MFA">Master of Fine Arts</option>
+                    <option value="MAGD">
+                      Master of Arts in Graphic Design
+                    </option>
+                    <option value="MAFD">
+                      Master of Arts in Fashion Design
+                    </option>
+                    <option value="MAID">
+                      Master of Arts in Interior Design
+                    </option>
+                    <option value="MAFS">Master of Arts in Film Studies</option>
+                    <option value="MAM">Master of Arts in Music</option>
+                    <option value="MATh">Master of Arts in Theater</option>
+
+                    <!-- Legal Studies -->
+                    <option value="MLS">Master of Legal Studies</option>
+                    <option value="MDR">Master of Dispute Resolution</option>
+                    <option value="MIL">Master of International Law</option>
+
+                    <!-- Information & Library Science -->
+                    <option value="MLIS">
+                      Master of Library and Information Science
+                    </option>
+                    <option value="MSIS">
+                      Master of Science in Information Systems
+                    </option>
+                    <option value="MSDA">
+                      Master of Science in Data Analytics
+                    </option>
+
+                    <!-- Environmental Studies -->
+                    <option value="MSEM">
+                      Master of Science in Environmental Management
+                    </option>
+                    <option value="MSS">
+                      Master of Science in Sustainability
+                    </option>
+                    <option value="MSCC">
+                      Master of Science in Climate Change
+                    </option>
+                    <option value="MSRE">
+                      Master of Science in Renewable Energy
+                    </option>
+
+                    <!-- Agriculture & Food -->
+                    <option value="MSAg">
+                      Master of Science in Agriculture
+                    </option>
+                    <option value="MSFS">
+                      Master of Science in Food Science
+                    </option>
+                    <option value="MSAB">
+                      Master of Science in Agribusiness
+                    </option>
+
+                    <!-- Architecture & Planning -->
+                    <option value="MArch">Master of Architecture</option>
+                    <option value="MUP">Master of Urban Planning</option>
+                    <option value="MLA">
+                      Master of Landscape Architecture
+                    </option>
+
+                    <!-- Emerging Fields -->
+                    <option value="MSAIR">
+                      Master of Science in Artificial Intelligence and Robotics
+                    </option>
+                    <option value="MSBT">
+                      Master of Science in Blockchain Technology
+                    </option>
+                    <option value="MSDM">
+                      Master of Science in Digital Marketing
+                    </option>
+                    <option value="MSEnt">
+                      Master of Science in Entrepreneurship
+                    </option>
+                    <option value="MSGH">
+                      Master of Science in Global Health
+                    </option>
+                  </select>
+                  <div class="error-message">
+                    Please select your preferred course
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="alert alert-success"
+                style="
+                  background-color: #e8f5e9;
+                  border-color: #c8e6c9;
+                  color: #2e7d32;
+                  margin-top: 20px;
+                "
+              >
+                <strong>Ready to go!</strong> We have all the information we
+                need to find the best universities for you.
+              </div>
+            </div>
+          </form>
+
+          <!-- Loading Screen -->
+          <div class="loading-spinner" id="loadingSpinner">
+            <div class="spinner"></div>
+            <div class="loading-text">Finding your perfect universities...</div>
+          </div>
+
+          <!-- Results -->
+          <div id="recommendation-result"></div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="wizard-navigation">
+          <button
+            type="button"
+            class="nav-button btn-ghost"
+            id="prevBtn"
+            onclick="changeStep(-1)"
+            disabled
+          >
+            ← Previous
+          </button>
+
+          <div class="step-info">
+            <span id="stepInfo">Step 1 of 4</span>
+          </div>
+
+          <button
+            type="button"
+            class="nav-button btn-primary"
+            id="nextBtn"
+            onclick="changeStep(1)"
+          >
+            Next →
+          </button>
+
+          <button
+            type="submit"
+            class="nav-button btn-primary"
+            id="submitBtn"
+            style="display: none"
+            form="recommendation-form"
+            onclick="return validateCurrentStep();"
+          >
+            Get Recommendations
+          </button>
+        </div>
+      </div>
     </div>
 
     <script>
-        document.getElementById('recommendation-form').addEventListener('submit', async function (e) {
-            e.preventDefault(); // Prevent default form submission
+      // Global variables
+      let currentStep = 1;
+      const totalSteps = 4;
+      let formData = {};
+      let touchStartX = 0;
+      let touchEndX = 0;
 
-            const formData = new FormData(this);
-            const resultDiv = document.getElementById('recommendation-result');
-            resultDiv.innerHTML = '<p class="loading">Loading recommendations...</p>'; // Show loading message
+      // Initialize the wizard
+      document.addEventListener("DOMContentLoaded", function () {
+        loadFormData();
+        updateProgressBar();
+        setupFormValidation();
+        setupTouchEvents();
 
-            try {
-                // Send the POST request to the server
-                const response = await fetch('/', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-
-                const result = await response.json();
-
-                if (result.status === "success" && result.recommendation) {
-                    // Parse the recommendation response into a table
-                    const lines = result.recommendation.split("\n").filter(line => line.trim() !== "");
-
-                    // Validate that the recommendation response contains data
-                    if (lines.length > 2) {
-                        const headers = lines[0].split("|").map(h => h.trim()).slice(1, -1);
-                        const rows = lines.slice(1).map(line =>
-                            line.split("|").map(cell => cell.trim()).slice(1, -1)
-                        );
-
-                        let tableHTML = `<h2>Recommended Universities</h2><table><thead><tr>`;
-                        headers.forEach(header => {
-                            tableHTML += `<th>${header}</th>`;
-                        }); 
-                        tableHTML += `</tr></thead><tbody>`;
-                        rows.forEach(row => {
-                            tableHTML += `<tr>`;
-                            row.forEach(cell => {
-                                tableHTML += `<td>${cell}</td>`;
-                            });
-                            tableHTML += `</tr>`;
-                        });
-                        tableHTML += `</tbody></table>`;
-                        tableHTML += `<button id="direct-apply-btn" class="direct-apply-btn">Direct Apply For Admissions</button>`;
-                        tableHTML += `<div id="direct-apply-options">
-                            <a href="http://wa.me/918239640289" target="_blank">WhatsApp</a>
-                            <a href="tel:+447915608702" target="_blank">Contact No</a>
-                            <a href="mailto:Info@foreignpathway.com" target="_blank">Email</a>
-                        </div>`;
-
-                        resultDiv.innerHTML = tableHTML;
-
-                        // Add event listener to toggle the direct apply options
-                        document.getElementById("direct-apply-btn").addEventListener("click", function (e) {
-                            e.preventDefault();
-                            const options = document.getElementById("direct-apply-options");
-                            if (options.style.display === "none" || options.style.display === "") {
-                                options.style.display = "block";
-                            } else {
-                                options.style.display = "none";
-                            }
-                        });
-                    } else {
-                        resultDiv.innerHTML = '<p>No valid recommendations received. Please try again.</p>';
-                    }
-                } else {
-                    resultDiv.innerHTML = `<p>Error: ${result.message || 'No recommendations received.'}</p>`;
-                }
-            } catch (error) {
-                console.error('Error fetching recommendations:', error);
-                resultDiv.innerHTML = '<p>An error occurred while fetching recommendations. Please try again later.</p>';
+        // Auto-format mobile number (digits only, max 15)
+        const mobileField = document.getElementById("mobile");
+        mobileField.addEventListener("input", function (e) {
+          formatMobileNumber(e);
+          // Additional safety check
+          setTimeout(() => {
+            let value = e.target.value.replace(/\D/g, "");
+            if (value.length > 15) {
+              e.target.value = value.substring(0, 15);
             }
+          }, 1);
         });
-       
+        mobileField.addEventListener("paste", function (e) {
+          // Delay to allow paste to complete, then format
+          setTimeout(() => {
+            formatMobileNumber(e);
+            // Additional check after paste
+            let value = e.target.value.replace(/\D/g, "");
+            if (value.length > 15) {
+              e.target.value = value.substring(0, 15);
+            }
+          }, 10);
+        });
+        mobileField.addEventListener("keypress", function (e) {
+          // Only allow digits and control keys
+          if (
+            !/[0-9]/.test(e.key) &&
+            ![
+              "Backspace",
+              "Delete",
+              "Tab",
+              "Escape",
+              "Enter",
+              "ArrowLeft",
+              "ArrowRight",
+              "ArrowUp",
+              "ArrowDown",
+            ].includes(e.key)
+          ) {
+            e.preventDefault();
+          }
+
+          // Prevent typing if already at max length
+          const currentValue = e.target.value.replace(/\D/g, "");
+          if (currentValue.length >= 15 && /[0-9]/.test(e.key)) {
+            e.preventDefault();
+          }
+        });
+        mobileField.addEventListener("blur", function (e) {
+          validateMobileField(e.target);
+        });
+
+        // Auto-save form data
+        document.querySelectorAll("input, select").forEach((field) => {
+          field.addEventListener("change", saveFormData);
+          field.addEventListener("input", saveFormData);
+        });
+
+        // Add click handler to ensure submit button is working
+        const submitBtn = document.getElementById("submitBtn");
+        if (submitBtn) {
+          submitBtn.addEventListener("click", function (e) {
+            // Force form submission if validation passes
+            const form = document.getElementById("recommendation-form");
+            if (form && validateCurrentStep()) {
+              form.dispatchEvent(
+                new Event("submit", { bubbles: true, cancelable: true })
+              );
+            }
+          });
+        }
+      });
+
+      // Step navigation
+      function changeStep(direction) {
+        if (direction === 1 && !validateCurrentStep()) {
+          return;
+        }
+
+        const newStep = currentStep + direction;
+
+        if (newStep >= 1 && newStep <= totalSteps) {
+          // Hide current step
+          document
+            .querySelector(`.step-content[data-step="${currentStep}"]`)
+            .classList.remove("active");
+          document
+            .querySelector(`.step[data-step="${currentStep}"]`)
+            .classList.remove("active");
+          document
+            .querySelector(`.step[data-step="${currentStep}"]`)
+            .classList.add("completed");
+
+          // Show new step
+          currentStep = newStep;
+          document
+            .querySelector(`.step-content[data-step="${currentStep}"]`)
+            .classList.add("active");
+          document
+            .querySelector(`.step[data-step="${currentStep}"]`)
+            .classList.add("active");
+
+          updateNavigation();
+          updateProgressBar();
+          updateStepInfo();
+          saveFormData();
+
+          // Scroll to top
+          document.querySelector(".wizard-content").scrollTop = 0;
+        }
+      }
+
+      // Validate current step
+      function validateCurrentStep() {
+        const currentStepElement = document.querySelector(
+          `.step-content[data-step="${currentStep}"]`
+        );
+
+        if (!currentStepElement) {
+          return false;
+        }
+
+        const requiredFields =
+          currentStepElement.querySelectorAll("[required]");
+        let isValid = true;
+
+        requiredFields.forEach((field, index) => {
+          const formGroup = field.closest(".form-group");
+
+          if (!field.value.trim()) {
+            formGroup.classList.add("error");
+            isValid = false;
+          } else {
+            formGroup.classList.remove("error");
+
+            // Additional validation
+            if (field.type === "email" && !isValidEmail(field.value)) {
+              formGroup.classList.add("error");
+              isValid = false;
+            }
+
+            // Mobile number validation
+            if (field.name === "mobile") {
+              const mobileValue = field.value.replace(/\D/g, "");
+              if (mobileValue.length < 10 || mobileValue.length > 15) {
+                formGroup.classList.add("error");
+                isValid = false;
+              }
+            }
+
+            if (field.type === "number") {
+              const min = parseFloat(field.min);
+              const max = parseFloat(field.max);
+              const value = parseFloat(field.value);
+
+              if (
+                (min !== undefined && value < min) ||
+                (max !== undefined && value > max)
+              ) {
+                formGroup.classList.add("error");
+                isValid = false;
+              }
+            }
+          }
+        });
+
+        return isValid;
+      }
+
+      // Update navigation buttons
+      function updateNavigation() {
+        const prevBtn = document.getElementById("prevBtn");
+        const nextBtn = document.getElementById("nextBtn");
+        const submitBtn = document.getElementById("submitBtn");
+
+        prevBtn.disabled = currentStep === 1;
+
+        if (currentStep === totalSteps) {
+          nextBtn.style.display = "none";
+          submitBtn.style.display = "block";
+        } else {
+          nextBtn.style.display = "block";
+          submitBtn.style.display = "none";
+        }
+      }
+
+      // Update progress bar
+      function updateProgressBar() {
+        const progressBar = document.getElementById("progressBar");
+        const progress = (currentStep / totalSteps) * 100;
+        progressBar.style.width = progress + "%";
+      }
+
+      // Update step info
+      function updateStepInfo() {
+        document.getElementById(
+          "stepInfo"
+        ).textContent = `Step ${currentStep} of ${totalSteps}`;
+      }
+
+      // Form validation setup
+      function setupFormValidation() {
+        document.querySelectorAll("input, select").forEach((field) => {
+          field.addEventListener("blur", function () {
+            const formGroup = this.closest(".form-group");
+
+            if (this.hasAttribute("required") && !this.value.trim()) {
+              formGroup.classList.add("error");
+            } else {
+              formGroup.classList.remove("error");
+            }
+          });
+
+          field.addEventListener("input", function () {
+            const formGroup = this.closest(".form-group");
+            if (formGroup.classList.contains("error") && this.value.trim()) {
+              formGroup.classList.remove("error");
+            }
+          });
+        });
+      }
+
+      // Touch events for mobile swipe
+      function setupTouchEvents() {
+        const wizardContent = document.querySelector(".wizard-content");
+
+        wizardContent.addEventListener("touchstart", function (e) {
+          touchStartX = e.changedTouches[0].screenX;
+        });
+
+        wizardContent.addEventListener("touchend", function (e) {
+          touchEndX = e.changedTouches[0].screenX;
+          handleSwipe();
+        });
+      }
+
+      function handleSwipe() {
+        const swipeThreshold = 50;
+        const diff = touchStartX - touchEndX;
+
+        if (Math.abs(diff) > swipeThreshold) {
+          if (diff > 0 && currentStep < totalSteps) {
+            // Swipe left - next step
+            changeStep(1);
+          } else if (diff < 0 && currentStep > 1) {
+            // Swipe right - previous step
+            changeStep(-1);
+          }
+        }
+      }
+
+      // Auto-save and load form data
+      function saveFormData() {
+        const formElements = document.querySelectorAll(
+          "#recommendation-form input, #recommendation-form select"
+        );
+        formElements.forEach((element) => {
+          if (element.value) {
+            formData[element.name] = element.value;
+          }
+        });
+        localStorage.setItem("universityFormData", JSON.stringify(formData));
+      }
+
+      function loadFormData() {
+        const savedData = localStorage.getItem("universityFormData");
+        if (savedData) {
+          formData = JSON.parse(savedData);
+          Object.keys(formData).forEach((key) => {
+            const field = document.querySelector(`[name="${key}"]`);
+            if (field) {
+              field.value = formData[key];
+            }
+          });
+        }
+      }
+
+      // Utility functions
+      function isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+      }
+
+      function formatMobileNumber(e) {
+        // Only allow digits and limit to 15 characters
+        let value = e.target.value.replace(/\D/g, "");
+        if (value.length > 15) {
+          value = value.substring(0, 15);
+        }
+        e.target.value = value;
+
+        // Validate the field immediately
+        validateMobileField(e.target);
+      }
+
+      function validateMobileField(field) {
+        // Ensure the value is exactly what we expect
+        let value = field.value.replace(/\D/g, "");
+        if (value.length > 15) {
+          value = value.substring(0, 15);
+          field.value = value;
+        }
+
+        // Show/hide error based on validation
+        const errorElement =
+          field.parentElement.querySelector(".error-message");
+        if (value.length === 0) {
+          errorElement.style.display = "block";
+          errorElement.textContent = "Mobile number is required";
+          field.classList.add("error");
+        } else if (value.length < 10) {
+          errorElement.style.display = "block";
+          errorElement.textContent =
+            "Mobile number should be at least 10 digits";
+          field.classList.add("error");
+        } else if (value.length > 15) {
+          errorElement.style.display = "block";
+          errorElement.textContent = "Mobile number cannot exceed 15 digits";
+          field.classList.add("error");
+        } else {
+          errorElement.style.display = "none";
+          field.classList.remove("error");
+        }
+      }
+
+      function formatPhoneNumber(e) {
+        let value = e.target.value.replace(/\D/g, "");
+        if (value.length >= 10) {
+          value = value.replace(/(\d{3})(\d{3})(\d{4})/, "($1) $2-$3");
+        }
+        e.target.value = value;
+      }
+
+      // Form submission
+      document
+        .getElementById("recommendation-form")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          if (!validateCurrentStep()) {
+            return;
+          }
+
+          // Final validation for mobile field before submission
+          const mobileField = document.getElementById("mobile");
+          let mobileValue = mobileField.value.replace(/\D/g, "");
+
+          // Ensure mobile value is never more than 15 characters
+          if (mobileValue.length > 15) {
+            mobileValue = mobileValue.substring(0, 15);
+            mobileField.value = mobileValue;
+          }
+
+          // Validate mobile field
+          validateMobileField(mobileField);
+          if (mobileField.classList.contains("error")) {
+            alert("Please fix the mobile number before submitting.");
+            return;
+          }
+
+          const formData = new FormData(this);
+
+          // Additional mobile validation in FormData
+          const formMobileValue = formData.get("mobile");
+          if (formMobileValue) {
+            const cleanedFormMobile = formMobileValue.replace(/\D/g, "");
+            if (cleanedFormMobile.length > 15) {
+              const correctedMobile = cleanedFormMobile.substring(0, 15);
+              formData.set("mobile", correctedMobile);
+            }
+          }
+
+          const resultDiv = document.getElementById("recommendation-result");
+          const loadingSpinner = document.getElementById("loadingSpinner");
+          const wizardNavigation = document.querySelector(".wizard-navigation");
+
+          // Hide form content and navigation, show loading
+          document.querySelector(".wizard-content").style.display = "none";
+          wizardNavigation.style.display = "none";
+          loadingSpinner.style.display = "block";
+
+          try {
+            const response = await fetch("/", {
+              method: "POST",
+              body: formData,
+            });
+
+            if (!response.ok) {
+              throw new Error("Network response was not ok");
+            }
+
+            const result = await response.json();
+
+            // Hide loading, show content
+            loadingSpinner.style.display = "none";
+            document.querySelector(".wizard-content").style.display = "block";
+
+            if (result.status === "success" && result.recommendation) {
+              displayResults(result.recommendation, resultDiv);
+              // Hide navigation on success (user is done)
+              wizardNavigation.style.display = "none";
+              // Clear saved form data on success
+              localStorage.removeItem("universityFormData");
+            } else {
+              // Show navigation again on error
+              wizardNavigation.style.display = "flex";
+              resultDiv.innerHTML = `
+                        <div class="alert alert-error">
+                            <strong>Error:</strong> ${
+                              result.message ||
+                              "No recommendations received. Please try again."
+                            }
+                            <br><br>
+                            <button onclick="resetForm()" class="nav-button btn-primary" style="margin-top: 10px;">
+                                🔄 Try Again
+                            </button>
+                        </div>
+                    `;
+            }
+          } catch (error) {
+            console.error("Error fetching recommendations:", error);
+            loadingSpinner.style.display = "none";
+            document.querySelector(".wizard-content").style.display = "block";
+            // Show navigation again on error
+            wizardNavigation.style.display = "flex";
+
+            resultDiv.innerHTML = `
+                    <div class="alert alert-error">
+                        <strong>Error:</strong> An error occurred while fetching recommendations. Please try again later.
+                        <br><br>
+                        <button onclick="resetForm()" class="nav-button btn-primary" style="margin-top: 10px;">
+                            🔄 Try Again
+                        </button>
+                    </div>
+                `;
+          }
+        });
+
+      function displayResults(recommendation, resultDiv) {
+        const lines = recommendation
+          .split("\n")
+          .filter((line) => line.trim() !== "");
+
+        if (lines.length > 2) {
+          const headers = lines[0]
+            .split("|")
+            .map((h) => h.trim())
+            .slice(1, -1);
+          const rows = lines.slice(1).map((line) =>
+            line
+              .split("|")
+              .map((cell) => cell.trim())
+              .slice(1, -1)
+          );
+
+          let tableHTML = `
+                    <div class="results-container">
+                        <h2 class="results-title">🎓 Your Recommended Universities</h2>
+                        <table>
+                            <thead>
+                                <tr>
+                `;
+
+          headers.forEach((header) => {
+            tableHTML += `<th>${header}</th>`;
+          });
+
+          tableHTML += `</tr></thead><tbody>`;
+
+          rows.forEach((row) => {
+            tableHTML += `<tr>`;
+            row.forEach((cell) => {
+              tableHTML += `<td>${cell}</td>`;
+            });
+            tableHTML += `</tr>`;
+          });
+
+          tableHTML += `
+                        </tbody>
+                    </table>
+                    <button id="direct-apply-btn" class="direct-apply-btn">
+                        🚀 Direct Apply For Admissions
+                    </button>
+                    <div id="direct-apply-options">
+                        <a href="http://wa.me/918239640289" target="_blank">📱 WhatsApp</a>
+                        <a href="tel:+447915608702" target="_blank">📞 Call Now</a>
+                        <a href="mailto:Info@foreignpathway.com" target="_blank">✉️ Email Us</a>
+                    </div>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button onclick="startOver()" class="nav-button btn-secondary">
+                            🔄 Start New Search
+                        </button>
+                    </div>
+                    </div>
+                `;
+
+          resultDiv.innerHTML = tableHTML;
+
+          // Add event listener for direct apply button
+          document
+            .getElementById("direct-apply-btn")
+            .addEventListener("click", function (e) {
+              e.preventDefault();
+              const options = document.getElementById("direct-apply-options");
+              if (
+                options.style.display === "none" ||
+                options.style.display === ""
+              ) {
+                options.style.display = "block";
+              } else {
+                options.style.display = "none";
+              }
+            });
+        } else {
+          resultDiv.innerHTML = `
+                    <div class="alert alert-error">
+                        <strong>No Results:</strong> No valid recommendations received. Please try again with different criteria.
+                    </div>
+                `;
+        }
+      }
+
+      // Keyboard navigation
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowRight" && currentStep < totalSteps) {
+          changeStep(1);
+        } else if (e.key === "ArrowLeft" && currentStep > 1) {
+          changeStep(-1);
+        }
+      });
+
+      // Initialize navigation
+      updateNavigation();
+      updateStepInfo();
+
+      function resetForm() {
+        // Hide results and show the form again
+        document.getElementById("recommendation-result").innerHTML = "";
+        document.querySelector(".wizard-content").style.display = "block";
+        document.querySelector(".wizard-navigation").style.display = "flex";
+
+        // Reset to step 4 (the last step) so user can try submitting again
+        currentStep = 4;
+
+        // Update UI to show step 4
+        document.querySelectorAll(".step-content").forEach((content) => {
+          content.classList.remove("active");
+        });
+        document.querySelectorAll(".step").forEach((step) => {
+          step.classList.remove("active", "completed");
+        });
+
+        document
+          .querySelector('.step-content[data-step="4"]')
+          .classList.add("active");
+        document.querySelector('.step[data-step="4"]').classList.add("active");
+        document
+          .querySelector('.step[data-step="4"]')
+          .classList.remove("completed");
+
+        updateNavigation();
+        updateProgressBar();
+        updateStepInfo();
+      }
+
+      function startOver() {
+        // Clear all form data
+        document.getElementById("recommendation-form").reset();
+        localStorage.removeItem("universityFormData");
+
+        // Clear results
+        document.getElementById("recommendation-result").innerHTML = "";
+
+        // Reset to step 1
+        currentStep = 1;
+
+        // Reset all steps
+        document.querySelectorAll(".step-content").forEach((content) => {
+          content.classList.remove("active");
+        });
+        document.querySelectorAll(".step").forEach((step) => {
+          step.classList.remove("active", "completed");
+        });
+
+        // Activate step 1
+        document
+          .querySelector('.step-content[data-step="1"]')
+          .classList.add("active");
+        document.querySelector('.step[data-step="1"]').classList.add("active");
+
+        // Show navigation and form
+        document.querySelector(".wizard-content").style.display = "block";
+        document.querySelector(".wizard-navigation").style.display = "flex";
+
+        updateNavigation();
+        updateProgressBar();
+        updateStepInfo();
+
+        // Scroll to top
+        document.querySelector(".wizard-content").scrollTop = 0;
+      }
+
+      async function submitFormData(formData) {
+        const resultDiv = document.getElementById("recommendation-result");
+        const loadingSpinner = document.getElementById("loadingSpinner");
+        const wizardNavigation = document.querySelector(".wizard-navigation");
+
+        // Hide form content and navigation, show loading
+        document.querySelector(".wizard-content").style.display = "none";
+        wizardNavigation.style.display = "none";
+        loadingSpinner.style.display = "block";
+
+        try {
+          const response = await fetch("/", {
+            method: "POST",
+            body: formData,
+          });
+
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+
+          const result = await response.json();
+
+          // Hide loading, show content
+          loadingSpinner.style.display = "none";
+          document.querySelector(".wizard-content").style.display = "block";
+
+          if (result.status === "success" && result.recommendation) {
+            displayResults(result.recommendation, resultDiv);
+            // Hide navigation on success (user is done)
+            wizardNavigation.style.display = "none";
+            // Clear saved form data on success
+            localStorage.removeItem("universityFormData");
+          } else {
+            // Show navigation again on error
+            wizardNavigation.style.display = "flex";
+            resultDiv.innerHTML = `
+                      <div class="alert alert-error">
+                          <strong>Error:</strong> ${
+                            result.message ||
+                            "No recommendations received. Please try again."
+                          }
+                          <br><br>
+                          <button onclick="resetForm()" class="nav-button btn-primary" style="margin-top: 10px;">
+                              🔄 Try Again
+                          </button>
+                      </div>
+                  `;
+          }
+        } catch (error) {
+          console.error("Error fetching recommendations:", error);
+          loadingSpinner.style.display = "none";
+          document.querySelector(".wizard-content").style.display = "block";
+          // Show navigation again on error
+          wizardNavigation.style.display = "flex";
+
+          resultDiv.innerHTML = `
+                  <div class="alert alert-error">
+                      <strong>Error:</strong> An error occurred while fetching recommendations. Please try again later.
+                      <br><br>
+                      <button onclick="resetForm()" class="nav-button btn-primary" style="margin-top: 10px;">
+                          🔄 Try Again
+                      </button>
+                  </div>
+              `;
+        }
+      }
+
+      // Periodic mobile field validation to catch edge cases
+      setInterval(function () {
+        const mobileField = document.getElementById("mobile");
+        if (mobileField && mobileField.value) {
+          let value = mobileField.value.replace(/\D/g, "");
+          if (value.length > 15) {
+            mobileField.value = value.substring(0, 15);
+            validateMobileField(mobileField);
+          }
+        }
+      }, 2000);
     </script>
-</body>
+  </body>
 </html>
